@@ -1817,9 +1817,9 @@ function renderPage3(a) {
   // ── SECTIONS GRID ─────────────────────────────────────────────
   html += '<div class="p3-sections">';
 
-  // Pendidikan Formal (utama)
+  // Pendidikan (utama)
   html += '<div class="p3-section">';
-  html += '<div class="p3-section-title">🎓 Pendidikan Formal</div>';
+  html += '<div class="p3-section-title">🎓 Pendidikan</div>';
   if (a.universitas) html += field('Universitas', escHtml(a.universitas));
   if (a.fakultas)    html += field('Fakultas', escHtml(a.fakultas));
   if (a.jurusan)     html += field('Jurusan / Prodi', escHtml(a.jurusan));
@@ -2031,7 +2031,7 @@ function renderPendidikanTambahan(raw) {
   if (!order.length) return '';
 
   var html = '<div class="p3-pengalaman">';
-  html += '<div class="p3-pengalaman-title">⭐ Pengalaman & Prestasi Akademik</div>';
+  html += '<div class="p3-pengalaman-title">⭐ Pengalaman & Prestasi Akademik/non Akademik</div>';
   html += '<div class="p3-pengalaman-grid">';
 
   order.forEach(function(kat) {
