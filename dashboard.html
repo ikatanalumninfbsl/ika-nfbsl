@@ -581,7 +581,7 @@ footer b{color:var(--g2)}
           <button onclick="loginRetry()" style="margin-top:8px;background:var(--g2);color:#0d1f10;border:none;border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔄 Coba Lagi</button>
         </div>
         <div class="login-hint">Masukkan nama lengkap seperti yang didaftarkan ke IKA NFBSL.<br>
-          Belum terdaftar? <a href="#" onclick="window.location.href='mai'+'lto:'+'ikatanalumninfbsl'+'@'+'gmail.com';return false;">Hubungi kami</a></div>
+          Belum terdaftar? <a href="#" onclick="window.location.href=atob('bWFpbHRvOmlrYXRhbmFsdW1uaW5mYnNsQGdtYWlsLmNvbQ==');return false;">Hubungi kami</a></div>
       </div>
 
       <!-- Step 2: Angkatan -->
@@ -1803,7 +1803,7 @@ function renderPage3(a) {
   html += '<div class="p3-gender" style="margin-top:6px;font-size:12px;color:var(--muted)">'+(a.gender||'')+(a.kota&&a.provinsi ? ' &nbsp;·&nbsp; 📍 '+escHtml(a.kota+', '+a.provinsi) : '')+'</div>';
   html += '</div>';
   // CTA Hubungi
-  var IKA_EMAIL = 'ikatanalumninfbsl' + '@' + 'gmail.com';
+  var IKA_EMAIL = atob('aWthdGFuYWx1bW5pbmZic2xAZ21haWwuY29t');
   var emailSubj = encodeURIComponent('Permintaan Kontak Alumni: '+a.nama+' ('+a.angkatan_nfl+')');
   var emailBody = encodeURIComponent('Halo IKA NFBSL,\n\nSaya tertarik untuk menghubungi alumni berikut:\n\nNama: '+a.nama+'\nAngkatan: '+a.angkatan_nfl+'\nBidang: '+(a.bidang_industri||a.jurusan||'-')+'\nInstansi: '+(a.perusahaan||'-')+'\n\nMohon bantuannya untuk dihubungkan.\n\nTerima kasih.');
   var emailHref = 'mai'+'lto:'+IKA_EMAIL+'?subject='+emailSubj+'&body='+emailBody;
