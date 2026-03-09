@@ -2244,4 +2244,10 @@ document.addEventListener('DOMContentLoaded', function() {
   loadFromSheets();
   // Focus input nama setelah data mulai load
   setTimeout(function(){
-    var inp = document.getElementBy
+    var inp = document.getElementById('login-nama');
+    if (inp && !document.getElementById('login-screen').classList.contains('hidden')) inp.focus();
+  }, 300);
+});
+</script>
+</body>
+</html>
