@@ -498,7 +498,7 @@ footer b{color:var(--g2)}
         <div class="login-lbl">Nama Lengkap</div>
         <input class="login-inp" id="login-nama" type="text" placeholder="Tulis nama lengkap sesuai data..." autocomplete="off"
           onkeydown="if(event.key==='Enter')loginCariNama()">
-        <button class="login-btn" onclick="loginCariNama()">Cari →</button>
+        <button class="login-btn" id="login-cari-btn" onclick="loginCariNama()" disabled>⏳ Memuat data...</button>
         <div class="login-err" id="lerr-1">Nama tidak ditemukan di database. Periksa ejaan atau hubungi IKA NFBSL.</div>
         <div class="login-hint">Masukkan nama lengkap seperti yang didaftarkan ke IKA NFBSL.<br>
           Belum terdaftar? <a href="/cdn-cgi/l/email-protection#771e1c16031619161b021a191e191115041b37101a161e1b5914181a">Hubungi kami</a></div>
@@ -1000,14 +1000,19 @@ function loadFromSheets() {
       el.textContent = '✓ ' + allData.length + ' alumni · ' + now;
       el.className = 'ok';
       document.getElementById('total-badge').textContent = allData.length + ' Alumni';
+      // Aktifkan tombol login setelah data siap
+      var cariBtn = document.getElementById('login-cari-btn');
+      if (cariBtn) { cariBtn.disabled = false; cariBtn.textContent = 'Cari →'; }
       renderAll();
     },
     error: function(err) {
       el.textContent = '⚠️ Gagal memuat Sheets: ' + err.message;
-      // Tetap tampilkan data manual walau Sheets error
       injectManualData();
       filteredData = allData.slice();
       document.getElementById('total-badge').textContent = allData.length + ' Alumni';
+      // Tetap aktifkan tombol walau error, agar bisa retry
+      var cariBtn = document.getElementById('login-cari-btn');
+      if (cariBtn) { cariBtn.disabled = false; cariBtn.textContent = 'Cari →'; }
       renderAll();
     }
   });
