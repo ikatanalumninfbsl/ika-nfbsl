@@ -377,8 +377,12 @@ footer strong{color:var(--g)}
           <div class="err-msg" id="e-masuk-kuliah">Wajib diisi</div>
         </div>
         <div>
-          <label>Tahun Lulus <span class="req">✦</span></label>
+          <label>Tahun Lulus <span class="req" id="lbl-req-lulus">✦</span></label>
           <input type="number" id="f-lulus-kuliah" min="2005" max="2035" placeholder="2024">
+          <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--g-dark);font-weight:500;cursor:pointer">
+            <input type="checkbox" id="cb-ongoing-kuliah" onchange="toggleOngoing('kuliah')" style="accent-color:var(--g);width:14px;height:14px">
+            Masih kuliah / belum lulus
+          </label>
           <div class="err-msg" id="e-lulus-kuliah">Wajib diisi</div>
         </div>
       </div>
@@ -521,40 +525,18 @@ footer strong{color:var(--g)}
       <input type="text" id="f-kota-kerja" placeholder="cth: Jakarta, Bandung, Singapura">
     </div>
 
-    <!-- Sampingan / Double Career -->
+    <!-- Sampingan / Double Career — multi entry -->
     <div id="sampingan-wrap" style="margin-top:4px">
       <button type="button" class="btnback" onclick="toggleSampingan()" id="btn-sampingan" style="border-color:var(--g);color:var(--g);display:flex;align-items:center;gap:6px;font-size:13px">
         <span id="sampingan-icon">＋</span> Tambah Pekerjaan / Usaha Sampingan
       </button>
     </div>
     <div id="sampingan-det" style="display:none;margin-top:14px">
-      <div class="divdr">Pekerjaan / Usaha Sampingan <span style="color:var(--muted);font-size:11px;font-style:italic">(opsional)</span></div>
-      <div class="fi">
-        <label>Nama Perusahaan / Usaha Sampingan <span class="opt">(opsional)</span></label>
-        <input type="text" id="f-perusahaan2" placeholder="cth: Toko Online, Konsultasi Freelance">
-      </div>
-      <div class="fi g2">
-        <div>
-          <label>Jabatan / Peran <span class="opt">(opsional)</span></label>
-          <input type="text" id="f-jabatan2" placeholder="cth: Founder, Co-Founder">
-        </div>
-        <div>
-          <label>Bidang Industri Sampingan <span class="opt">(opsional)</span></label>
-          <select id="f-industri2">
-            <option value="">— Pilih —</option>
-            <option>Teknologi & IT</option><option>Keuangan & Perbankan</option>
-            <option>Pendidikan & Riset</option><option>Kesehatan & Medis</option>
-            <option>Pemerintahan & Kebijakan</option><option>Manufaktur & Industri</option>
-            <option>Energi & Pertambangan</option><option>Pertanian & Pangan</option>
-            <option>Hukum & Advokasi</option><option>Media & Kreatif</option>
-            <option>Sports & Entertainment</option><option>Event Organizer</option>
-            <option>Konstruksi & Properti</option><option>Konsultansi & Manajemen</option>
-            <option>Transportasi & Logistik</option><option>NGO & Sosial</option>
-            <option>Pariwisata & Hospitality</option><option>Keagamaan & Dakwah</option>
-            <option>Wirausaha / Entrepreneur</option><option>Lainnya</option>
-          </select>
-        </div>
-      </div>
+      <div class="divdr">Pekerjaan / Usaha Sampingan <span style="color:var(--muted);font-size:11px;font-style:italic">(opsional, bisa lebih dari satu)</span></div>
+      <div id="sampingan-container"></div>
+      <button type="button" id="btn-add-sampingan" onclick="addSampingan()" style="margin-top:8px;background:none;border:1.5px dashed var(--g);color:var(--g);border-radius:10px;padding:8px 18px;font-size:13px;cursor:pointer;width:100%;font-weight:600">
+        ＋ Tambah Pekerjaan/Usaha Sampingan Lainnya
+      </button>
     </div>
   </div>
   <div class="navbtns"><button class="btnback" onclick="back(4)">← Kembali</button><button class="btnnext" onclick="next(4)">Selanjutnya →</button></div>
@@ -581,42 +563,16 @@ footer strong{color:var(--g)}
   </div>
 
   <div id="org-detail-wrap" style="display:none">
-    <div class="fi">
-      <label>Organisasi Kemasyarakatan / Bisnis <span class="opt">(bisa pilih lebih dari satu)</span></label>
-      <div class="chip-group" id="cg-org-ext">
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','HIPMI')">HIPMI</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','HMI')">HMI</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','PMII')">PMII</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','IMM')">IMM</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','GMNI')">GMNI</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','KADIN')">KADIN</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','Apindo')">Apindo</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','Muhammadiyah')">Muhammadiyah</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','NU / Ansor')">NU / Ansor</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','Ikadi')">Ikadi</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','Wahdah Islamiyah')">Wahdah Islamiyah</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','Partai Politik')">Partai Politik</div>
-        <div class="chip-opt" onclick="selChipMulti(this,'org-ext','Lainnya')">Lainnya</div>
-      </div>
-      <input type="hidden" id="f-org-ext">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;font-style:italic">
+      Isi satu per satu untuk setiap organisasi yang kamu ikuti.
     </div>
-
-    <div class="fi" id="org-parpol-wrap" style="display:none">
-      <label>Nama Partai Politik <span class="req">✦</span></label>
-      <input type="text" id="f-org-parpol" placeholder="cth: PKS, PKB, Golkar, Gerindra, dll.">
-      <div class="err-msg" id="e-org-parpol">Wajib diisi jika memilih Partai Politik</div>
-    </div>
-
-    <div class="fi" id="org-lain-wrap" style="display:none">
-      <label>Organisasi Lainnya (tulis manual)</label>
-      <input type="text" id="f-org-lain" placeholder="cth: IDI, IAI, PGRI, BEM Nasional, dll.">
-    </div>
-
-    <div class="fi">
-      <label>Peran / Jabatan di Organisasi <span class="req">✦</span></label>
-      <input type="text" id="f-org-jabatan" placeholder="cth: Ketua Cabang HIPMI Jakarta, Anggota HMI Komisariat FT UI">
-      <div class="err-msg" id="e-org-jabatan">Wajib diisi jika bergabung organisasi</div>
-    </div>
+    <div id="org-entry-container"></div>
+    <input type="hidden" id="f-org-ext">
+    <input type="hidden" id="f-org-jabatan">
+    <div class="err-msg" id="e-org-jabatan">Tambahkan minimal satu organisasi</div>
+    <button type="button" id="btn-add-org-entry" onclick="addOrgEntry()" style="margin-top:4px;background:none;border:1.5px dashed var(--g);color:var(--g);border-radius:10px;padding:9px 18px;font-size:13px;cursor:pointer;width:100%;font-weight:600">
+      ＋ Tambah Organisasi
+    </button>
   </div>
 
   <div class="fi">
@@ -658,16 +614,16 @@ footer strong{color:var(--g)}
     </select>
     <div class="err-msg" id="e-provinsi">Pilih provinsi domisili</div>
   </div>
-  <div class="fi g2">
-    <div>
-      <label>Kota / Kabupaten <span class="req">✦</span></label>
-      <input type="text" id="f-kota" placeholder="cth: Depok, Bandung">
-      <div class="err-msg" id="e-kota">Kota / Kabupaten wajib diisi</div>
-    </div>
-    <div id="negara-wrap" style="display:none">
-      <label>Negara <span class="opt">(jika luar negeri)</span></label>
-      <input type="text" id="f-negara" placeholder="cth: Malaysia, Australia">
-    </div>
+  <div class="fi" id="kota-domisili-wrap">
+    <label>Kota / Kabupaten <span class="req">✦</span></label>
+    <select id="f-kota" disabled style="background:var(--g-pale);color:var(--muted)">
+      <option value="">— Pilih provinsi dulu —</option>
+    </select>
+    <div class="err-msg" id="e-kota">Kota / Kabupaten wajib diisi</div>
+  </div>
+  <div class="fi" id="negara-wrap" style="display:none">
+    <label>Negara <span class="opt">(jika luar negeri)</span></label>
+    <input type="text" id="f-negara" placeholder="cth: Malaysia, Australia">
   </div>
   <div class="navbtns"><button class="btnback" onclick="back(6)">← Kembali</button><button class="btnnext" onclick="next(6)">Selanjutnya →</button></div>
 </div>
@@ -1034,8 +990,32 @@ function selRadio(el, group, val) {
 }
 
 function chkLN() {
-  document.getElementById('negara-wrap').style.display =
-    document.getElementById('f-provinsi').value === 'Luar Negeri' ? 'block' : 'none';
+  const prov = document.getElementById('f-provinsi').value;
+  document.getElementById('negara-wrap').style.display = prov === 'Luar Negeri' ? 'block' : 'none';
+
+  // Update dropdown kota domisili
+  const kotaSel = document.getElementById('f-kota');
+  kotaSel.innerHTML = '<option value="">— Pilih Kota/Kabupaten —</option>';
+
+  if (prov && prov !== 'Luar Negeri' && KOTA_BY_PROV[prov]) {
+    kotaSel.disabled = false;
+    kotaSel.style.background = '';
+    kotaSel.style.color = '';
+    KOTA_BY_PROV[prov].forEach(k => {
+      const o = document.createElement('option');
+      o.value = k; o.textContent = k;
+      kotaSel.appendChild(o);
+    });
+  } else if (prov === 'Luar Negeri') {
+    kotaSel.disabled = true;
+    kotaSel.style.background = 'var(--g-pale)';
+    kotaSel.innerHTML = '<option value="">— Tidak perlu (Luar Negeri) —</option>';
+  } else {
+    kotaSel.disabled = true;
+    kotaSel.style.background = 'var(--g-pale)';
+    kotaSel.style.color = 'var(--muted)';
+    kotaSel.innerHTML = '<option value="">— Pilih provinsi dulu —</option>';
+  }
 }
 
 function addEdu() {
@@ -1062,7 +1042,14 @@ function addEdu() {
         </select>
       </div>
       <div><label>Tahun Masuk</label><input type="number" id="f-masuk-${idx}" min="2005" max="2035" placeholder="2022"></div>
-      <div><label>Tahun Lulus</label><input type="number" id="f-lulus-${idx}" min="2005" max="2040" placeholder="2024"></div>
+      <div>
+        <label>Tahun Lulus</label>
+        <input type="number" id="f-lulus-${idx}" min="2005" max="2040" placeholder="2024">
+        <label style="display:flex;align-items:center;gap:5px;margin-top:5px;font-size:11.5px;color:var(--g-dark);cursor:pointer">
+          <input type="checkbox" id="cb-ongoing-${idx}" onchange="toggleOngoingExtra(${idx})" style="accent-color:var(--g);width:13px;height:13px">
+          Masih / belum lulus
+        </label>
+      </div>
     </div>
     <div class="fi"><label>Kota Kampus</label><input type="text" id="f-kota-kampus-${idx}" placeholder="cth: Yogyakarta"></div>
   `;
@@ -1225,6 +1212,8 @@ function getAkademikData() {
   return hasil.join(' | ');
 }
 
+// ── SAMPINGAN MULTI-ENTRY ─────────────────────────────────────
+let sampinganCount = 0;
 function toggleSampingan() {
   const det = document.getElementById('sampingan-det');
   const isHidden = det.style.display === 'none';
@@ -1233,24 +1222,202 @@ function toggleSampingan() {
   btn.innerHTML = isHidden
     ? '<span>−</span> Sembunyikan Sampingan'
     : '<span>＋</span> Tambah Pekerjaan / Usaha Sampingan';
+  if (isHidden && sampinganCount === 0) addSampingan();
+}
+
+const INDUSTRI_OPTS = ['Teknologi & IT','Keuangan & Perbankan','Pendidikan & Riset','Kesehatan & Medis','Pemerintahan & Kebijakan','Manufaktur & Industri','Energi & Pertambangan','Pertanian & Pangan','Hukum & Advokasi','Media & Kreatif','Sports & Entertainment','Event Organizer','Konstruksi & Properti','Konsultansi & Manajemen','Transportasi & Logistik','NGO & Sosial','Pariwisata & Hospitality','Keagamaan & Dakwah','Wirausaha / Entrepreneur','Lainnya'];
+
+function addSampingan() {
+  sampinganCount++;
+  const idx = sampinganCount;
+  const container = document.getElementById('sampingan-container');
+  const block = document.createElement('div');
+  block.id = 'sampingan-' + idx;
+  block.style.cssText = 'border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--bg)';
+  const industri = INDUSTRI_OPTS.map(o => `<option>${o}</option>`).join('');
+  block.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-size:12px;font-weight:700;color:var(--g-dark)">Sampingan #${idx}</span>
+      ${idx > 1 ? `<button type="button" onclick="removeSampingan(${idx})" style="background:none;border:none;color:#c0392b;font-size:13px;cursor:pointer;font-weight:700">✕ Hapus</button>` : ''}
+    </div>
+    <div class="fi"><label>Nama Perusahaan / Usaha</label>
+      <input type="text" id="f-sp-nama-${idx}" placeholder="cth: Toko Online, Freelance Design">
+    </div>
+    <div class="fi g2">
+      <div><label>Jabatan / Peran</label>
+        <input type="text" id="f-sp-jabatan-${idx}" placeholder="cth: Founder, Freelancer">
+      </div>
+      <div><label>Lokasi / Kota</label>
+        <input type="text" id="f-sp-lokasi-${idx}" placeholder="cth: Jakarta, Remote">
+      </div>
+    </div>
+    <div class="fi"><label>Bidang Industri</label>
+      <select id="f-sp-industri-${idx}"><option value="">— Pilih —</option>${industri}</select>
+    </div>
+  `;
+  container.appendChild(block);
+}
+
+function removeSampingan(idx) {
+  const el = document.getElementById('sampingan-' + idx);
+  if (el) { el.remove(); sampinganCount = Math.max(0, sampinganCount - 1); }
+}
+
+function getSampinganData() {
+  const entries = [];
+  document.querySelectorAll('[id^="sampingan-"]:not(#sampingan-wrap):not(#sampingan-det):not(#sampingan-container):not(#sampingan-icon)').forEach(el => {
+    const idx = el.id.replace('sampingan-', '');
+    if (!idx || isNaN(idx)) return;
+    const nama = (document.getElementById('f-sp-nama-'+idx)||{}).value || '';
+    if (!nama.trim()) return;
+    const jabatan = (document.getElementById('f-sp-jabatan-'+idx)||{}).value || '';
+    const lokasi  = (document.getElementById('f-sp-lokasi-'+idx)||{}).value || '';
+    const industri= (document.getElementById('f-sp-industri-'+idx)||{}).value || '';
+    entries.push(`${nama}|${jabatan}|${lokasi}|${industri}`);
+  });
+  return entries.join(' || ');
+}
+
+// ── ORGANISASI UNIFIED ENTRY ─────────────────────────────────
+let orgEntryCount = 0;
+
+const ORG_LIST = ['HIPMI', 'HMI', 'PMII', 'IMM', 'GMNI', 'KADIN', 'Apindo', 'Muhammadiyah', 'NU / Ansor', 'Ikadi', 'Wahdah Islamiyah', 'PKS', 'PKB', 'Golkar', 'Gerindra', 'PDI-P', 'Demokrat', 'NasDem', 'PPP', 'Hanura', 'PAN', 'Lainnya'];
+
+function setIkutOrgNew(val) {
+  document.getElementById('org-detail-wrap').style.display = val === 'ya' ? 'block' : 'none';
+  if (val === 'ya' && orgEntryCount === 0) addOrgEntry();
+  if (val === 'tidak') {
+    document.getElementById('org-entry-container').innerHTML = '';
+    orgEntryCount = 0;
+    document.getElementById('f-org-ext').value = '';
+    document.getElementById('f-org-jabatan').value = '';
+  }
+  document.getElementById('e-ikut-org').classList.remove('show');
+}
+
+function addOrgEntry() {
+  orgEntryCount++;
+  const idx = orgEntryCount;
+  const container = document.getElementById('org-entry-container');
+  const block = document.createElement('div');
+  block.id = 'org-entry-' + idx;
+  block.style.cssText = 'border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--bg-card)';
+  const orgOpts = ORG_LIST.map(o => `<option value="${o}">${o}</option>`).join('');
+  block.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-size:12px;font-weight:700;color:var(--g-dark)">Organisasi #${idx}</span>
+      ${idx > 1 ? `<button type="button" onclick="removeOrgEntry(${idx})" style="background:none;border:none;color:#c0392b;font-size:13px;cursor:pointer;font-weight:700">✕ Hapus</button>` : ''}
+    </div>
+    <div class="fi">
+      <label>Nama / Jenis Organisasi <span style="color:#c0392b">✦</span></label>
+      <select id="f-org-nama-${idx}" onchange="checkOrgLainnya(${idx})">
+        <option value="">— Pilih Organisasi —</option>
+        ${orgOpts}
+      </select>
+      <div class="err-msg" id="e-org-nama-${idx}">Wajib diisi</div>
+    </div>
+    <div id="org-lainnya-wrap-${idx}" style="display:none" class="fi">
+      <label>Nama Organisasi (tulis manual)</label>
+      <input type="text" id="f-org-lainnya-${idx}" placeholder="cth: IDI, IAI, PGRI, dll.">
+    </div>
+    <div class="fi g2">
+      <div>
+        <label>Peran / Jabatan <span style="color:#c0392b">✦</span></label>
+        <input type="text" id="f-org-jabatan-${idx}" placeholder="cth: Ketua Cabang, Anggota">
+        <div class="err-msg" id="e-org-jabatan-${idx}">Wajib diisi</div>
+      </div>
+      <div>
+        <label>Lokasi / Cabang</label>
+        <input type="text" id="f-org-lokasi-${idx}" placeholder="cth: Jakarta Selatan, Nasional">
+      </div>
+    </div>
+  `;
+  container.appendChild(block);
+}
+
+function checkOrgLainnya(idx) {
+  const val = (document.getElementById('f-org-nama-'+idx)||{}).value;
+  const wrap = document.getElementById('org-lainnya-wrap-'+idx);
+  if (wrap) wrap.style.display = val === 'Lainnya' ? 'block' : 'none';
+}
+
+function removeOrgEntry(idx) {
+  const el = document.getElementById('org-entry-' + idx);
+  if (el) el.remove();
+}
+
+function getOrgEntryData() {
+  const entries = [];
+  for (let i = 1; i <= orgEntryCount + 5; i++) {
+    const el = document.getElementById('org-entry-' + i);
+    if (!el) continue;
+    let nama = (document.getElementById('f-org-nama-'+i)||{}).value || '';
+    if (nama === 'Lainnya') nama = (document.getElementById('f-org-lainnya-'+i)||{}).value || 'Lainnya';
+    const jabatan = (document.getElementById('f-org-jabatan-'+i)||{}).value || '';
+    const lokasi  = (document.getElementById('f-org-lokasi-'+i)||{}).value || '';
+    if (nama.trim()) entries.push(`${nama}|${jabatan}|${lokasi}`);
+  }
+  return entries.join(' || ');
+}
+
+function validateOrgEntries() {
+  let ok = true;
+  for (let i = 1; i <= orgEntryCount + 5; i++) {
+    const el = document.getElementById('org-entry-' + i);
+    if (!el) continue;
+    const nama = (document.getElementById('f-org-nama-'+i)||{}).value || '';
+    const jab  = (document.getElementById('f-org-jabatan-'+i)||{}).value || '';
+    const enm  = document.getElementById('e-org-nama-'+i);
+    const ejb  = document.getElementById('e-org-jabatan-'+i);
+    if (!nama) { if(enm) enm.classList.add('show'); ok = false; }
+    else { if(enm) enm.classList.remove('show'); }
+    if (!jab) { if(ejb) ejb.classList.add('show'); ok = false; }
+    else { if(ejb) ejb.classList.remove('show'); }
+  }
+  // sync hidden fields for summary
+  document.getElementById('f-org-ext').value = getOrgEntryData();
+  document.getElementById('f-org-jabatan').value = getOrgEntryData();
+  return ok;
+}
+
+// ── ONGOING CHECKBOX ─────────────────────────────────────────
+function toggleOngoing(key) {
+  const cb    = document.getElementById('cb-ongoing-' + key);
+  const input = document.getElementById('f-lulus-' + key);
+  const req   = document.getElementById('lbl-req-lulus');
+  if (cb && cb.checked) {
+    input.value = '';
+    input.disabled = true;
+    input.placeholder = 'Masih berlangsung';
+    input.style.background = 'var(--g-pale)';
+    if (req) req.style.display = 'none';
+  } else {
+    input.disabled = false;
+    input.placeholder = '2024';
+    input.style.background = '';
+    if (req) req.style.display = '';
+  }
+}
+
+function toggleOngoingExtra(idx) {
+  const cb    = document.getElementById('cb-ongoing-' + idx);
+  const input = document.getElementById('f-lulus-' + idx);
+  if (cb && cb.checked) {
+    input.value = '';
+    input.disabled = true;
+    input.placeholder = 'Masih berlangsung';
+    input.style.background = 'var(--g-pale)';
+  } else {
+    input.disabled = false;
+    input.placeholder = '2024';
+    input.style.background = '';
+  }
 }
 
 function setIkutOrg(el, val) {
   el.closest('.rcards').querySelectorAll('.rcard').forEach(c => c.classList.remove('sel'));
   el.classList.add('sel');
-  document.getElementById('org-detail-wrap').style.display = val === 'ya' ? 'block' : 'none';
-  // Reset org fields when switching to 'tidak'
-  if (val === 'tidak') {
-    document.getElementById('f-org-ext').value = '';
-    document.getElementById('f-org-jabatan').value = '';
-    document.getElementById('f-org-parpol').value = '';
-    document.getElementById('f-org-lain').value = '';
-    document.querySelectorAll('#cg-org-ext .chip-opt').forEach(c => c.classList.remove('sel'));
-    document.getElementById('org-parpol-wrap').style.display = 'none';
-    document.getElementById('org-lain-wrap').style.display = 'none';
-  }
-  // Store choice — reuse aktif_alumni field prefix trick: we store in hidden field
-  document.getElementById('e-ikut-org').classList.remove('show');
+  setIkutOrgNew(val);
 }
 
 function v(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
@@ -1277,7 +1444,8 @@ function validate(step) {
     const fak = !v('f-fakultas'); showE('e-fakultas',fak); markE('f-fakultas',fak); if(fak) ok=false;
     const j = !v('f-jurusan'); showE('e-jurusan',j); markE('f-jurusan',j); if(j) ok=false;
     const mk = !v('f-masuk-kuliah'); showE('e-masuk-kuliah',mk); markE('f-masuk-kuliah',mk); if(mk) ok=false;
-    const lk = !v('f-lulus-kuliah'); showE('e-lulus-kuliah',lk); markE('f-lulus-kuliah',lk); if(lk) ok=false;
+    const ongoingKuliah = document.getElementById('cb-ongoing-kuliah')&&document.getElementById('cb-ongoing-kuliah').checked;
+    const lk = !ongoingKuliah && !v('f-lulus-kuliah'); showE('e-lulus-kuliah',lk); markE('f-lulus-kuliah',lk); if(lk) ok=false;
     const kk = !v('f-kota-kampus'); showE('e-kota-kampus',kk); markE('f-kota-kampus',kk); if(kk) ok=false;
     // Validasi program / pengalaman — jika ada yang ditambah, kategori+jenis+nama+lokasi wajib diisi
     for (let i = 1; i <= akadCount; i++) {
@@ -1321,12 +1489,7 @@ function validate(step) {
       showE('e-ikut-org', false);
       const ikutOrg = ikutOrgSel.querySelector('.rcard-title').textContent.startsWith('Ya');
       if (ikutOrg) {
-        const hasOrg = v('f-org-ext') !== '' || v('f-org-lain') !== '';
-        const jb = !v('f-org-jabatan'); showE('e-org-jabatan',jb); markE('f-org-jabatan',jb); if(jb) ok=false;
-        const hasParpol = v('f-org-ext').includes('Partai Politik');
-        if (hasParpol) {
-          const pp = !v('f-org-parpol'); showE('e-org-parpol',pp); markE('f-org-parpol',pp); if(pp) ok=false;
-        }
+        if (!validateOrgEntries()) ok = false;
       }
     }
   }
@@ -1334,7 +1497,8 @@ function validate(step) {
     const p = !v('f-provinsi'); showE('e-provinsi',p); markE('f-provinsi',p); if(p) ok=false;
     const isLN = v('f-provinsi') === 'Luar Negeri';
     if (!isLN) {
-      const k = !v('f-kota'); showE('e-kota',k); markE('f-kota',k); if(k) ok=false;
+      const isLuarNegeri = v('f-provinsi') === 'Luar Negeri';
+      const k = !isLuarNegeri && !v('f-kota'); showE('e-kota',k); markE('f-kota',k); if(k) ok=false;
     }
   }
   if (step === 7) {
@@ -1361,7 +1525,7 @@ function goStep(n) {
 }
 
 function buildSummary() {
-  const org = [v('f-org-ext'), v('f-org-lain')].filter(Boolean).join(', ');
+  const org = getOrgEntryData() || '—';
   const kotaLahir = v('f-prov-lahir') === 'Luar Negeri'
     ? v('f-negara-lahir')
     : [v('f-kotalahir'), v('f-prov-lahir')].filter(Boolean).join(', ');
@@ -1394,7 +1558,7 @@ function submitForm() {
 
   const SCRIPT_URL_POST = SCRIPT_URL; // gunakan SCRIPT_URL global
   const ref = 'NFBSL-' + Date.now().toString(36).toUpperCase().slice(-6);
-  const org = [v('f-org-ext'), v('f-org-lain')].filter(Boolean).join(', ');
+  const org = getOrgEntryData() || '—';
   const kotaLahirVal = v('f-prov-lahir') === 'Luar Negeri'
     ? v('f-negara-lahir')
     : v('f-kotalahir');
@@ -1404,7 +1568,7 @@ function submitForm() {
     nama:v('f-nama'), panggilan:v('f-panggil'), gender:v('f-gender'),
     tgl_lahir:v('f-lahir'), kota_lahir: kotaLahirVal,
     universitas:v('f-univ'), fakultas:v('f-fakultas'), jurusan:v('f-jurusan'),
-    jenjang:v('f-jenjang'), tahun_masuk_kuliah:v('f-masuk-kuliah'), tahun_lulus_kuliah:v('f-lulus-kuliah'), kota_kampus:v('f-kota-kampus'),
+    jenjang:v('f-jenjang'), tahun_masuk_kuliah:v('f-masuk-kuliah'), tahun_lulus_kuliah: document.getElementById('cb-ongoing-kuliah')&&document.getElementById('cb-ongoing-kuliah').checked ? 'Sedang Berlangsung' : v('f-lulus-kuliah'), kota_kampus:v('f-kota-kampus'),
     pendidikan_tambahan: [
       eduCount > 1 ? `Edu2: ${v('f-univ-2')||''} / ${v('f-jurusan-2')||''} / ${v('f-jenjang-2')||''}` : '',
       getAkademikData() ? `Pengalaman Akademik: ${getAkademikData()}` : ''
@@ -1413,8 +1577,8 @@ function submitForm() {
     org_nfbsl:v('f-org-nfl'),
     status_kerja:v('f-status'), perusahaan:v('f-perusahaan'), jabatan:v('f-jabatan'),
     bidang_industri:v('f-industri'), kota_kerja:v('f-kota-kerja'),
-    perusahaan_sampingan:v('f-perusahaan2'), jabatan_sampingan:v('f-jabatan2'), industri_sampingan:v('f-industri2'),
-    organisasi_eksternal:org, org_parpol:v('f-org-parpol'), org_jabatan:v('f-org-jabatan'), aktif_alumni:v('f-aktif-alumni'),
+    perusahaan_sampingan: getSampinganData(), jabatan_sampingan:'', industri_sampingan:'',
+    organisasi_eksternal: getOrgEntryData(), org_parpol:'', org_jabatan: getOrgEntryData(), aktif_alumni:v('f-aktif-alumni'),
     provinsi:v('f-provinsi'), kota:v('f-kota'), negara:v('f-negara'),
     hp:v('f-hp'), email:v('f-email'), instagram:v('f-ig'), linkedin:v('f-linkedin'),
     wa_group:v('f-wagroup'),
