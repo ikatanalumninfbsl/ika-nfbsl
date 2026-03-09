@@ -1830,19 +1830,41 @@ function renderPage3(a) {
 
   // Pendidikan Lanjutan / Edu2 — hanya tampil kalau ada data
   var edu2Val = extractEdu2(a);
+  var edu2PengalamanExtra = ''; // bagian Pengalaman Akademik yang ikut di Edu2
   if (edu2Val) {
     var edu2Entries = edu2Val.split('|||').map(function(s){ return s.trim(); }).filter(Boolean);
     edu2Entries.forEach(function(entry, idx) {
-      var edu2Parts = entry.split('/').map(function(s){ return s.trim(); });
+      // Pisahkan bagian pendidikan vs pengalaman akademik
+      // Format: "Univ / Jurusan / Jenjang || Pengalaman Akademik: [...]"
+      // atau bisa juga "Univ / Jurusan / Jenjang | Pengalaman Akademik: [...]"
+      var eduPart = entry;
+      var pengPart = '';
+
+      // Cek apakah ada "Pengalaman Akademik:" di dalam entry
+      var pengIdx = entry.search(/Pengalaman Akademik:/i);
+      if (pengIdx > 0) {
+        pengPart = entry.slice(pengIdx).trim();
+        eduPart  = entry.slice(0, pengIdx).replace(/\s*\|+\s*$/, '').trim();
+        edu2PengalamanExtra += (edu2PengalamanExtra ? '\n' : '') + pengPart;
+      }
+
+      // Parse bagian formal: Univ / Jurusan / Jenjang
+      // Tapi hati-hati: "/" juga ada di nama jurusan, jadi ambil max 3 segmen pertama
+      var edu2Parts = eduPart.split('/').map(function(s){ return s.trim(); });
       var edu2Univ    = edu2Parts[0] || '';
       var edu2Jurusan = edu2Parts[1] || '';
       var edu2Jenjang = edu2Parts[2] || '';
+      // Sisa setelah 3 segmen (kalau ada) — tapi jangan masukkan kalau itu pengalaman
+      var edu2Extra = edu2Parts.length > 3 ? edu2Parts.slice(3).join(' / ').replace(/\s*\|+.*/, '').trim() : '';
+
+      if (!edu2Univ && !edu2Jurusan) return; // skip kalau kosong
+
       html += '<div class="p3-section">';
       html += '<div class="p3-section-title">📖 Pendidikan Lanjutan'+(edu2Entries.length>1?' '+(idx+1):'')+'</div>';
       if (edu2Univ)    html += field('Universitas', escHtml(edu2Univ));
       if (edu2Jurusan) html += field('Jurusan / Prodi', escHtml(edu2Jurusan));
       if (edu2Jenjang) html += field('Jenjang', escHtml(edu2Jenjang));
-      if (edu2Parts.length > 3) html += field('Info Tambahan', escHtml(edu2Parts.slice(3).join(' / ')));
+      if (edu2Extra)   html += field('Info Tambahan', escHtml(edu2Extra));
       html += '</div>';
     });
   }
@@ -1894,10 +1916,11 @@ function renderPage3(a) {
 
   html += '</div>'; // end sections grid
 
-  // ── PENGALAMAN AKADEMIK (Pendidikan Tambahan — format bracket) ───
+  // ── PENGALAMAN AKADEMIK (Pendidikan Tambahan + bagian pengalaman dari Edu2) ───
   var pendTambahan = stripEdu2Lines(a.pendidikan_tambahan);
-  if (pendTambahan) {
-    html += renderPendidikanTambahan(pendTambahan);
+  var allPengalaman = [pendTambahan, edu2PengalamanExtra].filter(function(s){ return s && s.trim(); }).join('\n');
+  if (allPengalaman) {
+    html += renderPendidikanTambahan(allPengalaman);
   }
 
   // ── CTA FOOTER ────────────────────────────────────────────────
