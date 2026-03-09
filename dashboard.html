@@ -501,7 +501,7 @@ footer b{color:var(--g2)}
         <button class="login-btn" onclick="loginCariNama()">Cari →</button>
         <div class="login-err" id="lerr-1">Nama tidak ditemukan di database. Periksa ejaan atau hubungi IKA NFBSL.</div>
         <div class="login-hint">Masukkan nama lengkap seperti yang didaftarkan ke IKA NFBSL.<br>
-          Belum terdaftar? <a href="mailto:ikatanalumninfbsl@gmail.com">Hubungi kami</a></div>
+          Belum terdaftar? <a href="/cdn-cgi/l/email-protection#771e1c16031619161b021a191e191115041b37101a161e1b5914181a">Hubungi kami</a></div>
       </div>
 
       <!-- Step 2: Angkatan -->
@@ -898,7 +898,7 @@ footer b{color:var(--g2)}
   <footer><b>IKA Nurul Fikri Boarding School Lembang (IKA NFBSL)</b> — Data langsung dari Google Sheets</footer>
 </div><!-- end page-3 -->
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── DATA ─────────────────────────────────────────────────────────
 var allData = [];
 var filteredData = [];
@@ -979,6 +979,19 @@ function loadFromSheets() {
             negara:               r['Negara']                 || r.negara          || ''
           };
         }).filter(function(a){ return a.nama; });
+
+        // ── DEDUPLIKASI: kalau alumni submit form lebih dari sekali,
+        // simpan hanya row TERBARU (paling bawah) berdasarkan nama lengkap
+        var seen = {};
+        var deduped = [];
+        for (var i = allData.length - 1; i >= 0; i--) {
+          var key = allData[i].nama.trim().toLowerCase();
+          if (!seen[key]) {
+            seen[key] = true;
+            deduped.unshift(allData[i]); // unshift agar urutan asli terjaga
+          }
+        }
+        allData = deduped;
       }
       // Selalu inject data manual, terlepas dari hasil Sheets
       injectManualData();
@@ -2105,10 +2118,4 @@ document.addEventListener('DOMContentLoaded', function() {
   loadFromSheets();
   // Focus input nama setelah data mulai load
   setTimeout(function(){
-    var inp = document.getElementById('login-nama');
-    if (inp && !document.getElementById('login-screen').classList.contains('hidden')) inp.focus();
-  }, 300);
-});
-</script>
-</body>
-</html>
+    var inp = document.getElementBy
