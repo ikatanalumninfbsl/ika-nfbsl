@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard Alumni — IKA NFBSL</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
 :root {
   --bg:#08150a; --s1:#0d1f10; --s2:#112414;
@@ -913,6 +913,7 @@ var searchFilter = '';
 var activeOrgFilter = '';
 
 var SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbXTpML-7en4Po_n3uA1NYeve_Hi5XxCIPXeSdMAhw-Z36-q7lnVEnNK34ybv1vSLOzXguczblSkvA/pub?gid=0&single=true&output=csv';
+var SHEETS_CSV_PROXY = 'https://corsproxy.io/?' + encodeURIComponent(SHEETS_CSV_URL);
 
 var PROVS = [
   {n:'Aceh',sx:52,sy:60},{n:'Sumatera Utara',sx:100,sy:100},
@@ -961,89 +962,103 @@ function loadFromSheets() {
   el.textContent = '⏳ Memuat data...';
   el.className = '';
 
-  // Timeout 15 detik — tampilkan error jika Sheets tidak merespons
+  // Timeout 15 detik
   var loadTimeout = setTimeout(function() {
     loginSetLoadError();
     el.textContent = '⚠️ Timeout memuat data';
   }, 15000);
-  Papa.parse(SHEETS_CSV_URL, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: function(result) {
-      if (!result.data || result.data.length === 0) {
-        el.textContent = '⚠️ Belum ada data dari Sheets';
-      } else {
-        allData = result.data.map(function(r) {
-          return {
-            nama:                 r['Nama Lengkap']           || r.nama            || '',
-            gender:               r['Jenis Kelamin']          || r.gender          || '',
-            tgl_lahir:            r['Tanggal Lahir']          || r.tgl_lahir       || '',
-            angkatan_nfl:         r['Angkatan NFBSL']         || r.angkatan_nfbsl  || r.angkatan_nfl || '',
-            universitas:          r['Universitas']            || r.universitas     || '',
-            fakultas:             r['Fakultas']               || r.fakultas        || '',
-            jurusan:              r['Jurusan / Prodi']        || r.jurusan         || '',
-            jenjang:              r['Jenjang']                || r.jenjang         || '',
-            kota_kampus:          r['Kota Kampus']            || r.kota_kampus     || '',
-            pendidikan_tambahan:  r['Pendidikan Tambahan']    || r.pendidikan_tambahan || '',
-            edu2:                 r['Edu2']                   || r.edu2               || '',
-            status_kerja:         r['Status Kerja']           || r.status_kerja    || '',
-            perusahaan:           r['Perusahaan / Instansi']  || r.perusahaan      || '',
-            jabatan:              r['Jabatan / Posisi']       || r.jabatan         || '',
-            bidang_industri:      r['Bidang Industri']        || r.bidang_industri || '',
-            kota_kerja:           r['Kota Kerja']             || r.kota_kerja      || '',
-            perusahaan_sampingan: r['Perusahaan Sampingan']   || r.perusahaan_sampingan || '',
-            jabatan_sampingan:    r['Jabatan Sampingan']      || r.jabatan_sampingan    || '',
-            industri_sampingan:   r['Industri Sampingan']     || r.industri_sampingan   || '',
-            organisasi_eksternal: r['Organisasi Eksternal']   || r.organisasi_eksternal || '',
-            org_parpol:           r['Partai Politik']         || r.org_parpol      || '',
-            org_jabatan:          r['Jabatan di Organisasi']  || r.org_jabatan     || '',
-            aktif_alumni:         r['Keaktifan Alumni']       || r.aktif_alumni    || '',
-            provinsi:             r['Provinsi Domisili']      || r.provinsi        || '',
-            kota:                 r['Kota / Kabupaten']       || r.kota            || '',
-            negara:               r['Negara']                 || r.negara          || ''
-          };
-        }).filter(function(a){ return a.nama; });
 
-        // ── DEDUPLIKASI: kalau alumni submit form lebih dari sekali,
-        // simpan hanya row TERBARU (paling bawah) berdasarkan nama lengkap
-        var seen = {};
-        var deduped = [];
-        for (var i = allData.length - 1; i >= 0; i--) {
-          var key = allData[i].nama.trim().toLowerCase();
-          if (!seen[key]) {
-            seen[key] = true;
-            deduped.unshift(allData[i]); // unshift agar urutan asli terjaga
+  function parseCSV(url) {
+    Papa.parse(url, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(result) {
+        clearTimeout(loadTimeout);
+        if (!result.data || result.data.length === 0) {
+          // Coba proxy kalau direct gagal/kosong
+          if (url === SHEETS_CSV_URL) {
+            parseCSV(SHEETS_CSV_PROXY);
+            return;
           }
+          el.textContent = '⚠️ Belum ada data dari Sheets';
+          loginSetLoadError();
+          return;
         }
-        allData = deduped;
+        onDataLoaded(result.data, el);
+      },
+      error: function(err) {
+        clearTimeout(loadTimeout);
+        // Coba proxy kalau direct error
+        if (url === SHEETS_CSV_URL) {
+          el.textContent = '⏳ Mencoba koneksi alternatif...';
+          parseCSV(SHEETS_CSV_PROXY);
+          return;
+        }
+        el.textContent = '⚠️ Gagal memuat data';
+        loginSetLoadError();
+        injectManualData();
+        filteredData = allData.slice();
+        document.getElementById('total-badge').textContent = allData.length + ' Alumni';
+        var cariBtn = document.getElementById('login-cari-btn');
+        if (cariBtn) { cariBtn.disabled = false; cariBtn.textContent = 'Cari →'; }
+        renderAll();
       }
-      // Selalu inject data manual, terlepas dari hasil Sheets
-      injectManualData();
-      filteredData = allData.slice();
-      var now = new Date().toLocaleTimeString('id-ID');
-      el.textContent = '✓ ' + allData.length + ' alumni · ' + now;
-      el.className = 'ok';
-      document.getElementById('total-badge').textContent = allData.length + ' Alumni';
-      clearTimeout(loadTimeout);
-      // Aktifkan tombol login setelah data siap
-      var cariBtn = document.getElementById('login-cari-btn');
-      if (cariBtn) { cariBtn.disabled = false; cariBtn.textContent = 'Cari →'; }
-      renderAll();
-    },
-    error: function(err) {
-      clearTimeout(loadTimeout);
-      el.textContent = '⚠️ Gagal memuat Sheets: ' + err.message;
-      loginSetLoadError();
-      injectManualData();
-      filteredData = allData.slice();
-      document.getElementById('total-badge').textContent = allData.length + ' Alumni';
-      // Tetap aktifkan tombol walau error
-      var cariBtn = document.getElementById('login-cari-btn');
-      if (cariBtn) { cariBtn.disabled = false; cariBtn.textContent = 'Cari →'; }
-      renderAll();
-    }
-  });
+    });
+  }
+
+  parseCSV(SHEETS_CSV_URL);
+}
+
+function onDataLoaded(rows, el) {
+  allData = rows.map(function(r) {
+    return {
+      nama:                 r['Nama Lengkap']           || r.nama            || '',
+      gender:               r['Jenis Kelamin']          || r.gender          || '',
+      tgl_lahir:            r['Tanggal Lahir']          || r.tgl_lahir       || '',
+      angkatan_nfl:         r['Angkatan NFBSL']         || r.angkatan_nfbsl  || r.angkatan_nfl || '',
+      universitas:          r['Universitas']            || r.universitas     || '',
+      fakultas:             r['Fakultas']               || r.fakultas        || '',
+      jurusan:              r['Jurusan / Prodi']        || r.jurusan         || '',
+      jenjang:              r['Jenjang']                || r.jenjang         || '',
+      kota_kampus:          r['Kota Kampus']            || r.kota_kampus     || '',
+      pendidikan_tambahan:  r['Pendidikan Tambahan']    || r.pendidikan_tambahan || '',
+      edu2:                 r['Edu2']                   || r.edu2               || '',
+      status_kerja:         r['Status Kerja']           || r.status_kerja    || '',
+      perusahaan:           r['Perusahaan / Instansi']  || r.perusahaan      || '',
+      jabatan:              r['Jabatan / Posisi']       || r.jabatan         || '',
+      bidang_industri:      r['Bidang Industri']        || r.bidang_industri || '',
+      kota_kerja:           r['Kota Kerja']             || r.kota_kerja      || '',
+      perusahaan_sampingan: r['Perusahaan Sampingan']   || r.perusahaan_sampingan || '',
+      jabatan_sampingan:    r['Jabatan Sampingan']      || r.jabatan_sampingan    || '',
+      industri_sampingan:   r['Industri Sampingan']     || r.industri_sampingan   || '',
+      organisasi_eksternal: r['Organisasi Eksternal']   || r.organisasi_eksternal || '',
+      org_parpol:           r['Partai Politik']         || r.org_parpol      || '',
+      org_jabatan:          r['Jabatan di Organisasi']  || r.org_jabatan     || '',
+      aktif_alumni:         r['Keaktifan Alumni']       || r.aktif_alumni    || '',
+      provinsi:             r['Provinsi Domisili']      || r.provinsi        || '',
+      kota:                 r['Kota / Kabupaten']       || r.kota            || '',
+      negara:               r['Negara']                 || r.negara          || ''
+    };
+  }).filter(function(a){ return a.nama; });
+
+  // Deduplikasi — simpan hanya row terbaru per nama
+  var seen = {}, deduped = [];
+  for (var i = allData.length - 1; i >= 0; i--) {
+    var key = allData[i].nama.trim().toLowerCase();
+    if (!seen[key]) { seen[key] = true; deduped.unshift(allData[i]); }
+  }
+  allData = deduped;
+
+  injectManualData();
+  filteredData = allData.slice();
+  var now = new Date().toLocaleTimeString('id-ID');
+  el.textContent = '✓ ' + allData.length + ' alumni · ' + now;
+  el.className = 'ok';
+  document.getElementById('total-badge').textContent = allData.length + ' Alumni';
+  var cariBtn = document.getElementById('login-cari-btn');
+  if (cariBtn) { cariBtn.disabled = false; cariBtn.textContent = 'Cari →'; }
+  renderAll();
 }
 
 // ── FILTER ───────────────────────────────────────────────────────
