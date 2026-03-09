@@ -500,6 +500,10 @@ footer b{color:var(--g2)}
           onkeydown="if(event.key==='Enter')loginCariNama()">
         <button class="login-btn" id="login-cari-btn" onclick="loginCariNama()" disabled>⏳ Memuat data...</button>
         <div class="login-err" id="lerr-1">Nama tidak ditemukan di database. Periksa ejaan atau hubungi IKA NFBSL.</div>
+        <div id="login-load-err" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;background:rgba(232,90,90,.1);border:1px solid rgba(232,90,90,.3);color:#e85a5a;font-size:12px;text-align:center">
+          ⚠️ Gagal memuat data dari server.<br>
+          <button onclick="loginRetry()" style="margin-top:8px;background:var(--g2);color:#0d1f10;border:none;border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔄 Coba Lagi</button>
+        </div>
         <div class="login-hint">Masukkan nama lengkap seperti yang didaftarkan ke IKA NFBSL.<br>
           Belum terdaftar? <a href="/cdn-cgi/l/email-protection#771e1c16031619161b021a191e191115041b37101a161e1b5914181a">Hubungi kami</a></div>
       </div>
@@ -936,11 +940,32 @@ function injectManualData() {
   // Kosong — tidak ada data manual saat ini
 }
 
+function loginSetLoadError() {
+  var cariBtn = document.getElementById('login-cari-btn');
+  if (cariBtn && cariBtn.disabled) {
+    cariBtn.style.display = 'none';
+    document.getElementById('login-load-err').style.display = 'block';
+  }
+}
+
+function loginRetry() {
+  document.getElementById('login-load-err').style.display = 'none';
+  var cariBtn = document.getElementById('login-cari-btn');
+  if (cariBtn) { cariBtn.style.display = ''; cariBtn.disabled = true; cariBtn.textContent = '⏳ Memuat data...'; }
+  loadFromSheets();
+}
+
 // ── LOAD DATA ────────────────────────────────────────────────────
 function loadFromSheets() {
   var el = document.getElementById('live-status');
   el.textContent = '⏳ Memuat data...';
   el.className = '';
+
+  // Timeout 15 detik — tampilkan error jika Sheets tidak merespons
+  var loadTimeout = setTimeout(function() {
+    loginSetLoadError();
+    el.textContent = '⚠️ Timeout memuat data';
+  }, 15000);
   Papa.parse(SHEETS_CSV_URL, {
     download: true,
     header: true,
@@ -1000,17 +1025,20 @@ function loadFromSheets() {
       el.textContent = '✓ ' + allData.length + ' alumni · ' + now;
       el.className = 'ok';
       document.getElementById('total-badge').textContent = allData.length + ' Alumni';
+      clearTimeout(loadTimeout);
       // Aktifkan tombol login setelah data siap
       var cariBtn = document.getElementById('login-cari-btn');
       if (cariBtn) { cariBtn.disabled = false; cariBtn.textContent = 'Cari →'; }
       renderAll();
     },
     error: function(err) {
+      clearTimeout(loadTimeout);
       el.textContent = '⚠️ Gagal memuat Sheets: ' + err.message;
+      loginSetLoadError();
       injectManualData();
       filteredData = allData.slice();
       document.getElementById('total-badge').textContent = allData.length + ' Alumni';
-      // Tetap aktifkan tombol walau error, agar bisa retry
+      // Tetap aktifkan tombol walau error
       var cariBtn = document.getElementById('login-cari-btn');
       if (cariBtn) { cariBtn.disabled = false; cariBtn.textContent = 'Cari →'; }
       renderAll();
