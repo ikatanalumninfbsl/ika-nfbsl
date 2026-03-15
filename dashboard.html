@@ -1837,35 +1837,52 @@ function parseSampingan(a) {
 }
 
 // ── PARSE ORGANISASI ─────────────────────────────────────────────
-// Format baru: "Nama|Jabatan|Lokasi || Nama2|Jabatan2|Lokasi2"
-// Format lama: organisasi_eksternal = nama saja (comma-separated)
 function parseOrganisasi(a) {
   var results = [];
-
-  // Format baru dari kolom Organisasi (Nama|Jabatan|Lokasi)
   var rawBaru = (a.org_baru || '').trim();
-  if (rawBaru && rawBaru.indexOf('|') >= 0) {
-    // Split per 3 token = 1 organisasi
-    var tokens = rawBaru.split('|');
-    var current = [];
-    for (var i = 0; i < tokens.length; i++) {
-      current.push(tokens[i].trim());
-      if (current.length === 3) {
-        if (current[0]) results.push({ nama: current[0], jabatan: current[1], lokasi: current[2] });
-        current = [];
+
+  if (rawBaru) {
+    // Cek apakah format pipe (Nama|Jabatan|Lokasi) atau comma-separated nama saja
+    if (rawBaru.indexOf('|') >= 0) {
+      // Format pipe: tiap 3 token = 1 organisasi
+      var tokens = rawBaru.split('|');
+      var current = [];
+      for (var i = 0; i < tokens.length; i++) {
+        current.push(tokens[i].trim());
+        if (current.length === 3) {
+          if (current[0]) results.push({ nama: current[0], jabatan: current[1], lokasi: current[2] });
+          current = [];
+        }
       }
-    }
-    if (current.length && current[0]) {
-      while (current.length < 3) current.push('');
-      results.push({ nama: current[0], jabatan: current[1], lokasi: current[2] });
+      if (current.length && current[0]) {
+        while (current.length < 3) current.push('');
+        results.push({ nama: current[0], jabatan: current[1], lokasi: current[2] });
+      }
+      // Tambahkan jabatan dari kolom Jabatan di Organisasi jika hanya ada 1 org
+      if (results.length === 1 && !results[0].jabatan && a.org_jabatan) {
+        results[0].jabatan = a.org_jabatan;
+      }
+    } else {
+      // Format comma-separated nama saja (misal: "HIPMI, HMI")
+      var jabatan = a.org_jabatan || '';
+      var namaList = rawBaru.split(',').map(function(s){ return s.trim(); })
+        .filter(function(s){ return s && s.toLowerCase() !== 'lainnya'; });
+      namaList.forEach(function(nama, idx) {
+        results.push({
+          nama:    nama,
+          jabatan: idx === 0 ? jabatan : '', // jabatan hanya untuk org pertama
+          lokasi:  ''
+        });
+      });
     }
   }
 
-  // Format lama — organisasi_eksternal berisi nama saja
+  // Format lama — organisasi_eksternal
   if (!results.length && a.organisasi_eksternal) {
-    a.organisasi_eksternal.split(',').forEach(function(o) {
+    var jabatan = a.org_jabatan || '';
+    a.organisasi_eksternal.split(',').forEach(function(o, idx) {
       o = o.trim();
-      if (o) results.push({ nama: o, jabatan: a.org_jabatan || '', lokasi: '' });
+      if (o) results.push({ nama: o, jabatan: idx === 0 ? jabatan : '', lokasi: '' });
     });
   }
 
