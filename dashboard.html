@@ -548,6 +548,8 @@ footer b{color:var(--g2)}
   font-family:inherit;cursor:pointer;padding:0;margin-top:12px;display:block;
   width:100%;text-align:center}
 .login-back:hover{color:var(--text)}
+.p3-sampingan-idx{font-size:10px;font-weight:800;color:var(--g2);
+  text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -1108,6 +1110,7 @@ function onDataLoaded(rows, el) {
       perusahaan_sampingan: r['Perusahaan Sampingan']   || r.perusahaan_sampingan || '',
       jabatan_sampingan:    r['Jabatan Sampingan']      || r.jabatan_sampingan    || '',
       industri_sampingan:   r['Industri Sampingan']     || r.industri_sampingan   || '',
+      sampingan_baru:       r['Pekerjaan Sampingan (Nama|Jabatan|Lokasi|Industri)'] || '',
       organisasi_eksternal: r['Organisasi Eksternal']   || r.organisasi_eksternal || '',
       org_parpol:           r['Partai Politik']         || r.org_parpol      || '',
       org_jabatan:          r['Jabatan di Organisasi']  || r.org_jabatan     || '',
@@ -1779,6 +1782,43 @@ function tags(values, type) {
   return values.split(',').map(function(v){ v=v.trim(); return v?'<span class="p3-tag '+cls+'">'+escHtml(v)+'</span>':''; }).join('');
 }
 
+// ── PARSE PEKERJAAN SAMPINGAN ─────────────────────────────────────
+// Handle 2 format:
+// Format lama: field terpisah perusahaan_sampingan, jabatan_sampingan, industri_sampingan
+// Format baru: "Nama|Jabatan|Lokasi|Industri || Nama2|Jabatan2|Lokasi2|Industri2"
+function parseSampingan(a) {
+  var results = [];
+
+  // Format baru — kolom "Pekerjaan Sampingan (Nama|Jabatan|Lokasi|Industri)"
+  if (a.sampingan_baru && a.sampingan_baru.trim()) {
+    var entries = a.sampingan_baru.split(/\s*\|\|\s*/);
+    entries.forEach(function(entry) {
+      entry = entry.trim();
+      if (!entry) return;
+      var parts = entry.split('|').map(function(s){ return s.trim(); });
+      var item = {
+        nama:     parts[0] || '',
+        jabatan:  parts[1] || '',
+        lokasi:   parts[2] || '',
+        industri: parts[3] || ''
+      };
+      if (item.nama || item.jabatan) results.push(item);
+    });
+  }
+
+  // Format lama — kolom terpisah (hanya kalau format baru kosong)
+  if (!results.length && (a.perusahaan_sampingan || a.jabatan_sampingan)) {
+    results.push({
+      nama:     a.perusahaan_sampingan || '',
+      jabatan:  a.jabatan_sampingan    || '',
+      lokasi:   '',
+      industri: a.industri_sampingan   || ''
+    });
+  }
+
+  return results;
+}
+
 function renderPage3(a) {
   var ini = getInitials(a.nama||'?');
   var col = avatarColor(a.nama||'');
@@ -1817,9 +1857,9 @@ function renderPage3(a) {
   // ── SECTIONS GRID ─────────────────────────────────────────────
   html += '<div class="p3-sections">';
 
-  // Pendidikan (utama)
+  // Pendidikan Formal (utama)
   html += '<div class="p3-section">';
-  html += '<div class="p3-section-title">🎓 Pendidikan</div>';
+  html += '<div class="p3-section-title">🎓 Pendidikan Formal</div>';
   if (a.universitas) html += field('Universitas', escHtml(a.universitas));
   if (a.fakultas)    html += field('Fakultas', escHtml(a.fakultas));
   if (a.jurusan)     html += field('Jurusan / Prodi', escHtml(a.jurusan));
@@ -1834,7 +1874,7 @@ function renderPage3(a) {
   if (edu2Val) {
     var edu2Entries = edu2Val.split('|||').map(function(s){ return s.trim(); }).filter(Boolean);
     edu2Entries.forEach(function(entry, idx) {
-      // Pisahkan bagian pendidikan vs pengalaman akademik
+      // Pisahkan bagian pendidikan formal vs pengalaman akademik
       // Format: "Univ / Jurusan / Jenjang || Pengalaman Akademik: [...]"
       // atau bisa juga "Univ / Jurusan / Jenjang | Pengalaman Akademik: [...]"
       var eduPart = entry;
@@ -1880,12 +1920,21 @@ function renderPage3(a) {
   html += '</div>';
 
   // Pekerjaan Sampingan
+  var sampinganList = parseSampingan(a);
   html += '<div class="p3-section">';
   html += '<div class="p3-section-title">🔄 Pekerjaan Sampingan</div>';
-  if (a.perusahaan_sampingan) html += field('Perusahaan', escHtml(a.perusahaan_sampingan));
-  if (a.jabatan_sampingan)    html += field('Jabatan', escHtml(a.jabatan_sampingan));
-  if (a.industri_sampingan)   html += field('Industri', escHtml(a.industri_sampingan));
-  if (!a.perusahaan_sampingan && !a.jabatan_sampingan) html += '<div class="p3-field-value muted">Tidak ada</div>';
+  if (sampinganList.length) {
+    sampinganList.forEach(function(s, idx) {
+      if (sampinganList.length > 1) html += '<div class="p3-sampingan-idx">'+(idx+1)+'</div>';
+      if (s.nama)     html += field('Perusahaan / Instansi', escHtml(s.nama));
+      if (s.jabatan)  html += field('Jabatan', escHtml(s.jabatan));
+      if (s.lokasi)   html += field('Lokasi', escHtml(s.lokasi));
+      if (s.industri) html += field('Industri', escHtml(s.industri));
+      if (idx < sampinganList.length - 1) html += '<div style="border-top:1px solid var(--border);margin:10px 0"></div>';
+    });
+  } else {
+    html += '<div class="p3-field-value muted">Tidak ada</div>';
+  }
   html += '</div>';
 
   // Domisili
