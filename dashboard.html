@@ -1112,6 +1112,7 @@ function onDataLoaded(rows, el) {
       organisasi_eksternal: r['Organisasi Eksternal']   || r.organisasi_eksternal || '',
       org_parpol:           r['Partai Politik']         || r.org_parpol      || '',
       org_jabatan:          r['Jabatan di Organisasi']  || r.org_jabatan     || '',
+      org_baru:             r['Organisasi (Nama|Jabatan|Lokasi)'] || '',
       aktif_alumni:         r['Keaktifan Alumni']       || r.aktif_alumni    || '',
       provinsi:             r['Provinsi Domisili']      || r.provinsi        || '',
       kota:                 r['Kota / Kabupaten']       || r.kota            || '',
@@ -1835,6 +1836,42 @@ function parseSampingan(a) {
   return results;
 }
 
+// ── PARSE ORGANISASI ─────────────────────────────────────────────
+// Format baru: "Nama|Jabatan|Lokasi || Nama2|Jabatan2|Lokasi2"
+// Format lama: organisasi_eksternal = nama saja (comma-separated)
+function parseOrganisasi(a) {
+  var results = [];
+
+  // Format baru dari kolom Organisasi (Nama|Jabatan|Lokasi)
+  var rawBaru = (a.org_baru || '').trim();
+  if (rawBaru && rawBaru.indexOf('|') >= 0) {
+    // Split per 3 token = 1 organisasi
+    var tokens = rawBaru.split('|');
+    var current = [];
+    for (var i = 0; i < tokens.length; i++) {
+      current.push(tokens[i].trim());
+      if (current.length === 3) {
+        if (current[0]) results.push({ nama: current[0], jabatan: current[1], lokasi: current[2] });
+        current = [];
+      }
+    }
+    if (current.length && current[0]) {
+      while (current.length < 3) current.push('');
+      results.push({ nama: current[0], jabatan: current[1], lokasi: current[2] });
+    }
+  }
+
+  // Format lama — organisasi_eksternal berisi nama saja
+  if (!results.length && a.organisasi_eksternal) {
+    a.organisasi_eksternal.split(',').forEach(function(o) {
+      o = o.trim();
+      if (o) results.push({ nama: o, jabatan: a.org_jabatan || '', lokasi: '' });
+    });
+  }
+
+  return results;
+}
+
 function renderPage3(a) {
   var ini = getInitials(a.nama||'?');
   var col = avatarColor(a.nama||'');
@@ -1963,18 +2000,25 @@ function renderPage3(a) {
   html += '</div>';
 
   // Organisasi (full width)
-  var hasOrg = a.organisasi_eksternal || a.org_parpol || a.org_jabatan;
+  var orgList = parseOrganisasi(a);
+  var hasOrg = orgList.length || a.org_parpol || a.org_jabatan || a.org_baru;
   html += '<div class="p3-section p3-section-full">';
   html += '<div class="p3-section-title">🤝 Organisasi & Keterlibatan</div>';
   var orgHtml = '';
-  if (a.organisasi_eksternal) {
-    a.organisasi_eksternal.split(',').forEach(function(o){
-      o = o.trim();
-      if (o) orgHtml += '<span class="p3-tag">'+escHtml(o)+'</span>';
+
+  if (orgList.length) {
+    orgHtml += '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px">';
+    orgList.forEach(function(o) {
+      orgHtml += '<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;min-width:160px">';
+      orgHtml += '<div style="font-size:12px;font-weight:700;color:var(--text)">'+escHtml(o.nama)+'</div>';
+      if (o.jabatan) orgHtml += '<div style="font-size:11px;color:var(--g2);margin-top:2px">'+escHtml(o.jabatan)+'</div>';
+      if (o.lokasi)  orgHtml += '<div style="font-size:11px;color:var(--muted)">📍 '+escHtml(o.lokasi)+'</div>';
+      orgHtml += '</div>';
     });
+    orgHtml += '</div>';
   }
-  if (a.org_parpol)  orgHtml += '<span class="p3-tag gold">🏛 '+escHtml(a.org_parpol)+'</span>';
-  if (a.org_jabatan) orgHtml += field('Jabatan Organisasi', escHtml(a.org_jabatan));
+
+  if (a.org_parpol)  orgHtml += '<span class="p3-tag gold" style="margin-right:4px">🏛 '+escHtml(a.org_parpol)+'</span>';
   if (a.aktif_alumni) orgHtml += '<div style="margin-top:8px;font-size:12px;color:var(--g2)">✅ '+escHtml(a.aktif_alumni)+'</div>';
   html += orgHtml || '<div class="p3-field-value muted">Tidak ada data organisasi</div>';
   html += '</div>';
