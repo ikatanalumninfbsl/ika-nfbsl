@@ -1275,7 +1275,7 @@ function getSampinganData() {
     const industri= (document.getElementById('f-sp-industri-'+idx)||{}).value || '';
     entries.push(`${nama}|${jabatan}|${lokasi}|${industri}`);
   });
-  return entries.join(' || ');
+  return entries.join('||');
 }
 
 // ── ORGANISASI UNIFIED ENTRY ─────────────────────────────────
@@ -1524,25 +1524,6 @@ function goStep(n) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── FORMAT HELPERS untuk ringkasan ───────────────────────────
-function formatOrgData(raw) {
-  if (!raw) return '—';
-  return raw.split(' || ').map(entry => {
-    const [nama, jabatan, lokasi] = entry.split('|');
-    const parts = [jabatan, lokasi].filter(Boolean).join(', ');
-    return `🤝 ${nama||''}${parts ? ' — ' + parts : ''}`;
-  }).join('\n');
-}
-
-function formatPipeData(raw) {
-  if (!raw) return '—';
-  return raw.split(' || ').map((entry, i) => {
-    const [nama, jabatan, lokasi, industri] = entry.split('|');
-    const parts = [jabatan, lokasi, industri].filter(Boolean).join(', ');
-    return `💼 ${nama||''}${parts ? ' — ' + parts : ''}`;
-  }).join('\n');
-}
-
 function buildSummary() {
   const org = getOrgEntryData() || '—';
   const kotaLahir = v('f-prov-lahir') === 'Luar Negeri'
@@ -1558,14 +1539,12 @@ function buildSummary() {
     ['Tahun Lulus Kuliah', v('f-lulus-kuliah')], ['Kota Kampus', v('f-kota-kampus')],
     akad ? ['Pengalaman Akademik', akad] : null,
     ['Status Saat Ini', v('f-status')], ['Bidang Industri', v('f-industri')||'—'],
-    ['Perusahaan', v('f-perusahaan')||'—'],
-    getSampinganData() ? ['Pekerjaan Sampingan', formatPipeData(getSampinganData())] : null,
-    ['Organisasi', formatOrgData(getOrgEntryData())],
-    ['Provinsi Domisili', v('f-provinsi')],
+    ['Perusahaan', v('f-perusahaan')||'—'], ['Usaha Sampingan', v('f-perusahaan2')||'—'],
+    ['Organisasi', org||'—'], ['Provinsi Domisili', v('f-provinsi')],
     ['Kota', v('f-kota')||'—'], ['No. HP', v('f-hp')], ['Email', v('f-email')],
   ].filter(Boolean);
   document.getElementById('sgrid').innerHTML = items.map(([k,val]) =>
-    `<div class="sitem"><div class="slbl">${k}</div><div class="sval" style="white-space:pre-line;line-height:1.6">${val||'—'}</div></div>`).join('');
+    `<div class="sitem"><div class="slbl">${k}</div><div class="sval">${val||'—'}</div></div>`).join('');
 }
 
 function submitForm() {
@@ -1593,7 +1572,7 @@ function submitForm() {
     pendidikan_tambahan: [
       eduCount > 1 ? `Edu2: ${v('f-univ-2')||''} / ${v('f-jurusan-2')||''} / ${v('f-jenjang-2')||''}` : '',
       getAkademikData() ? `Pengalaman Akademik: ${getAkademikData()}` : ''
-    ].filter(Boolean).join(' || '),
+    ].filter(Boolean).join('||'),
     angkatan_nfbsl:v('f-angkatan'), tahun_masuk_nfbsl:v('f-masuk-nfl'), tahun_lulus_nfbsl:v('f-lulus-nfl'),
     org_nfbsl:v('f-org-nfl'),
     status_kerja:v('f-status'), perusahaan:v('f-perusahaan'), jabatan:v('f-jabatan'),
