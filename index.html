@@ -1264,18 +1264,19 @@ function removeSampingan(idx) {
 }
 
 function getSampinganData() {
-  const entries = [];
+  const parts = [];
   document.querySelectorAll('[id^="sampingan-"]:not(#sampingan-wrap):not(#sampingan-det):not(#sampingan-container):not(#sampingan-icon)').forEach(el => {
     const idx = el.id.replace('sampingan-', '');
     if (!idx || isNaN(idx)) return;
-    const nama = (document.getElementById('f-sp-nama-'+idx)||{}).value || '';
-    if (!nama.trim()) return;
-    const jabatan = (document.getElementById('f-sp-jabatan-'+idx)||{}).value || '';
-    const lokasi  = (document.getElementById('f-sp-lokasi-'+idx)||{}).value || '';
-    const industri= (document.getElementById('f-sp-industri-'+idx)||{}).value || '';
-    entries.push(`${nama}|${jabatan}|${lokasi}|${industri}`);
+    const nama = (document.getElementById('f-sp-nama-'+idx)||{}).value?.trim() || '';
+    if (!nama) return;
+    const jabatan = (document.getElementById('f-sp-jabatan-'+idx)||{}).value?.trim() || '';
+    const lokasi  = (document.getElementById('f-sp-lokasi-'+idx)||{}).value?.trim() || '';
+    const industri= (document.getElementById('f-sp-industri-'+idx)||{}).value?.trim() || '';
+    // Format: 4 field per pekerjaan, langsung disambung dengan | tanpa pemisah ||
+    parts.push(nama, jabatan, lokasi, industri);
   });
-  return entries.join('||');
+  return parts.join('|');
 }
 
 // ── ORGANISASI UNIFIED ENTRY ─────────────────────────────────
