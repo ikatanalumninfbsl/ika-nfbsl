@@ -1783,30 +1783,46 @@ function tags(values, type) {
 // ── PARSE PEKERJAAN SAMPINGAN ─────────────────────────────────────
 function parseSampingan(a) {
   var results = [];
-
-  // Cek format baru: "Nama|Jabatan|Lokasi|Industri || Nama2|..."
-  // Bisa ada di kolom baru (sampingan_baru) ATAU kolom lama (perusahaan_sampingan)
   var rawBaru = (a.sampingan_baru || '').trim() || (a.perusahaan_sampingan || '').trim();
 
-  // Deteksi apakah ini format baru (mengandung '|')
   if (rawBaru && rawBaru.indexOf('|') >= 0) {
-    var entries = rawBaru.split('||');
-    entries.forEach(function(entry) {
-      entry = entry.trim();
-      if (!entry) return;
-      var parts = entry.split('|').map(function(s){ return s.trim(); });
-      var item = {
+    // Split by || untuk dapat tiap entry pekerjaan
+    // Tapi hati-hati: "Nama|Jabatan||Industri" artinya lokasi kosong di posisi 3
+    // Kita perlu rebuild entry yang benar: 4 field per pekerjaan
+
+    // Pertama, pecah semua token per |
+    var tokens = rawBaru.split('|');
+    
+    // Rekonstruksi entries: setiap 4 token = 1 pekerjaan
+    // Token kosong di antara || adalah lokasi kosong — tetap dihitung
+    var entries = [];
+    var current = [];
+    
+    for (var i = 0; i < tokens.length; i++) {
+      current.push(tokens[i].trim());
+      if (current.length === 4) {
+        entries.push(current);
+        current = [];
+      }
+    }
+    // Sisa token (kurang dari 4)
+    if (current.length && current[0]) {
+      while (current.length < 4) current.push('');
+      entries.push(current);
+    }
+
+    entries.forEach(function(parts) {
+      if (!parts[0]) return; // skip kalau nama kosong
+      results.push({
         nama:     parts[0] || '',
         jabatan:  parts[1] || '',
         lokasi:   parts[2] || '',
         industri: parts[3] || ''
-      };
-      if (!item.nama) return;
-      results.push(item);
+      });
     });
   }
 
-  // Format lama — kolom terpisah (tidak ada '|' di perusahaan_sampingan)
+  // Format lama — kolom terpisah
   if (!results.length && (a.perusahaan_sampingan || a.jabatan_sampingan)) {
     results.push({
       nama:     a.perusahaan_sampingan || '',
