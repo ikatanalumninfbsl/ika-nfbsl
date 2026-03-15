@@ -1783,15 +1783,16 @@ function tags(values, type) {
 }
 
 // ── PARSE PEKERJAAN SAMPINGAN ─────────────────────────────────────
-// Handle 2 format:
-// Format lama: field terpisah perusahaan_sampingan, jabatan_sampingan, industri_sampingan
-// Format baru: "Nama|Jabatan|Lokasi|Industri || Nama2|Jabatan2|Lokasi2|Industri2"
 function parseSampingan(a) {
   var results = [];
 
-  // Format baru — kolom "Pekerjaan Sampingan (Nama|Jabatan|Lokasi|Industri)"
-  if (a.sampingan_baru && a.sampingan_baru.trim()) {
-    var entries = a.sampingan_baru.split(/\s*\|\|\s*/);
+  // Cek format baru: "Nama|Jabatan|Lokasi|Industri || Nama2|..."
+  // Bisa ada di kolom baru (sampingan_baru) ATAU kolom lama (perusahaan_sampingan)
+  var rawBaru = (a.sampingan_baru || '').trim() || (a.perusahaan_sampingan || '').trim();
+
+  // Deteksi apakah ini format baru (mengandung '|')
+  if (rawBaru && rawBaru.indexOf('|') >= 0) {
+    var entries = rawBaru.split('||');
     entries.forEach(function(entry) {
       entry = entry.trim();
       if (!entry) return;
@@ -1802,11 +1803,12 @@ function parseSampingan(a) {
         lokasi:   parts[2] || '',
         industri: parts[3] || ''
       };
-      if (item.nama || item.jabatan) results.push(item);
+      if (!item.nama) return;
+      results.push(item);
     });
   }
 
-  // Format lama — kolom terpisah (hanya kalau format baru kosong)
+  // Format lama — kolom terpisah (tidak ada '|' di perusahaan_sampingan)
   if (!results.length && (a.perusahaan_sampingan || a.jabatan_sampingan)) {
     results.push({
       nama:     a.perusahaan_sampingan || '',
