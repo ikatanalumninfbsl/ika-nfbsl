@@ -1677,6 +1677,7 @@ function renderSearch() {
           || (a.bidang_industri||'').toLowerCase().indexOf(q)>=0
           || (a.jurusan||'').toLowerCase().indexOf(q)>=0
           || (a.organisasi_eksternal||'').toLowerCase().indexOf(q)>=0
+          || (a.org_baru||'').toLowerCase().indexOf(q)>=0
           || (a.org_parpol||'').toLowerCase().indexOf(q)>=0
           || (a.jabatan||'').toLowerCase().indexOf(q)>=0;
     });
@@ -1700,7 +1701,22 @@ function renderSearch() {
     var stat  = fmtStatus(a.status_kerja);
     var kerja = a.perusahaan ? (a.jabatan ? a.jabatan+' @ '+a.perusahaan : a.perusahaan) : '';
     var bid   = a.bidang_industri || '';
-    var org   = a.organisasi_eksternal ? a.organisasi_eksternal.split(',').slice(0,2).join(', ') : '';
+    var org = '';
+    var orgRaw = (a.org_baru || a.organisasi_eksternal || '').trim();
+    if (orgRaw) {
+      if (orgRaw.indexOf('|') >= 0) {
+        var toks = orgRaw.split('|');
+        var orgNames = [];
+        for (var ti = 0; ti < toks.length; ti += 3) {
+          var tn = toks[ti].trim();
+          if (tn && tn.toLowerCase() !== 'lainnya') orgNames.push(tn);
+        }
+        org = orgNames.slice(0,2).join(', ');
+      } else {
+        org = orgRaw.split(',').map(function(o){ return o.trim(); })
+          .filter(function(o){ return o && o.toLowerCase() !== 'lainnya'; }).slice(0,2).join(', ');
+      }
+    }
     if (a.org_parpol) org = org ? org+', '+a.org_parpol : a.org_parpol;
 
     html += '<div class="acard">';
@@ -1727,12 +1743,26 @@ function renderSearch() {
 function countOrg(limit) {
   var c = {};
   filteredData.forEach(function(a) {
-    if (!a.organisasi_eksternal) return;
-    var orgs = a.organisasi_eksternal.split(',');
-    orgs.forEach(function(o) {
-      var org = o.trim();
-      if (org && org !== 'Lainnya') c[org] = (c[org]||0)+1;
-    });
+    // Baca dari kolom baru (org_baru) maupun lama (organisasi_eksternal)
+    var raw = (a.org_baru || a.organisasi_eksternal || '').trim();
+    if (!raw) return;
+    // Ekstrak nama-nama organisasi (bisa comma-separated atau pipe-format)
+    var names = [];
+    if (raw.indexOf('|') >= 0) {
+      // Format pipe: tiap 3 token = 1 org, ambil token ke-0 (nama)
+      var tokens = raw.split('|');
+      for (var i = 0; i < tokens.length; i += 3) {
+        var n = tokens[i].trim();
+        if (n && n.toLowerCase() !== 'lainnya') names.push(n);
+      }
+    } else {
+      // Format comma-separated
+      raw.split(',').forEach(function(o){
+        var n = o.trim();
+        if (n && n.toLowerCase() !== 'lainnya') names.push(n);
+      });
+    }
+    names.forEach(function(org){ c[org] = (c[org]||0)+1; });
   });
   return Object.keys(c).map(function(k){ return [k,c[k]]; }).sort(function(a,b){ return b[1]-a[1]; }).slice(0,limit||8);
 }
@@ -1763,30 +1793,56 @@ function filterOrg(val, el) {
 function renderOrgMembers() {
   var grid = document.getElementById('org-member-grid');
   if (!grid) return;
+
+  function getOrgStr(a) {
+    return ((a.org_baru || a.organisasi_eksternal || '') + ' ' + (a.org_parpol||'')).toLowerCase();
+  }
+
   var data = filteredData.filter(function(a) {
-    if (!activeOrgFilter) return a.organisasi_eksternal || a.org_parpol;
-    var orgStr = (a.organisasi_eksternal||'') + ' ' + (a.org_parpol||'');
-    return orgStr.toLowerCase().indexOf(activeOrgFilter.toLowerCase()) >= 0;
+    var hasOrg = a.org_baru || a.organisasi_eksternal || a.org_parpol;
+    if (!hasOrg) return false;
+    if (!activeOrgFilter) return true;
+    return getOrgStr(a).indexOf(activeOrgFilter.toLowerCase()) >= 0;
   });
+
   if (!data.length) {
     grid.innerHTML = '<div class="om-no-result">Tidak ada alumni di organisasi ini</div>';
     return;
   }
+
   var shown = data.slice(0, 80);
   var html = shown.map(function(a) {
     var ini = getInitials(a.nama||'?');
     var col = avatarColor(a.nama||'');
-    var org = a.organisasi_eksternal || '';
-    if (a.org_parpol) org += (org?', ':'')+a.org_parpol;
+    // Ambil nama-nama organisasi untuk ditampilkan
+    var orgNames = [];
+    var raw = (a.org_baru || a.organisasi_eksternal || '').trim();
+    if (raw) {
+      if (raw.indexOf('|') >= 0) {
+        var tokens = raw.split('|');
+        for (var i = 0; i < tokens.length; i += 3) {
+          var n = tokens[i].trim();
+          if (n && n.toLowerCase() !== 'lainnya') orgNames.push(n);
+        }
+      } else {
+        raw.split(',').forEach(function(o){
+          var n = o.trim();
+          if (n && n.toLowerCase() !== 'lainnya') orgNames.push(n);
+        });
+      }
+    }
+    if (a.org_parpol) orgNames.push(a.org_parpol);
+    var orgDisplay = orgNames.slice(0,2).join(', ');
     var jabOrg = a.org_jabatan || '';
-    return '<div class="omcard">'
+    return '<div class="omcard" onclick="openRincianByNama(\''+escHtml(a.nama)+'\')" style="cursor:pointer">'
       +'<div class="omavatar" style="background:'+col+'">'+ini+'</div>'
-      +'<div style="min-width:0"><div class="omname">'+(a.nama||'—')+'</div>'
-      +'<div class="omang">'+(a.angkatan_nfl||'—')+'</div>'
-      +(org?'<div style="font-size:10px;color:var(--g2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+org+'</div>':'')
-      +(jabOrg?'<div style="font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+jabOrg+'</div>':'')
+      +'<div style="min-width:0"><div class="omname">'+escHtml(a.nama||'—')+'</div>'
+      +'<div class="omang">'+escHtml(a.angkatan_nfl||'—')+'</div>'
+      +(orgDisplay?'<div style="font-size:10px;color:var(--g2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(orgDisplay)+'</div>':'')
+      +(jabOrg?'<div style="font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(jabOrg.slice(0,40))+'</div>':'')
       +'</div></div>';
   }).join('');
+
   if (data.length > 80) html += '<div class="om-no-result">...dan '+(data.length-80)+' lainnya</div>';
   grid.innerHTML = html;
 }
@@ -1880,7 +1936,8 @@ function getP2Data() {
           || (a.bidang_industri||'').toLowerCase().indexOf(q)>=0
           || (a.provinsi||'').toLowerCase().indexOf(q)>=0
           || (a.kota||'').toLowerCase().indexOf(q)>=0
-          || (a.organisasi_eksternal||'').toLowerCase().indexOf(q)>=0;
+          || (a.organisasi_eksternal||'').toLowerCase().indexOf(q)>=0
+          || (a.org_baru||'').toLowerCase().indexOf(q)>=0;
     });
   }
   return data;
