@@ -179,6 +179,89 @@ header{position:sticky;top:0;z-index:100;background:rgba(8,21,10,.93);backdrop-f
 .sc-lbl{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
 .sc-val{font-size:28px;font-weight:800;letter-spacing:-1px}
 .sc-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.sc-mini-bars{display:flex;gap:3px;margin-top:8px;align-items:flex-end;height:24px}
+.sc-mini-bar{flex:1;border-radius:2px 2px 0 0;min-width:4px;transition:height .5s ease;opacity:.85}
+.sc-mini-bar:hover{opacity:1}
+.sc-insight{font-size:10px;color:var(--g2);font-weight:700;margin-top:4px;
+  background:rgba(82,196,122,.08);border-radius:4px;padding:2px 6px;display:inline-block}
+
+/* SPOTLIGHT */
+.spotlight-wrap{padding:0 24px 20px}
+.spotlight-hd{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.7px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.spotlight-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+.spotlight-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:900px){.spotlight-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:580px){.spotlight-grid{grid-template-columns:1fr}}
+.spotlight-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;
+  padding:16px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.spotlight-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.spotlight-card:nth-child(1)::before{background:linear-gradient(90deg,var(--g2),var(--blue))}
+.spotlight-card:nth-child(2)::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.spotlight-card:nth-child(3)::before{background:linear-gradient(90deg,var(--purple),var(--blue))}
+.spotlight-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.sp-badge{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  padding:2px 8px;border-radius:10px;margin-bottom:10px;display:inline-block}
+.sp-badge.intl{background:rgba(90,180,232,.15);color:var(--blue);border:1px solid rgba(90,180,232,.3)}
+.sp-badge.wirausaha{background:rgba(212,167,66,.15);color:var(--gold2);border:1px solid rgba(212,167,66,.3)}
+.sp-badge.akademik{background:rgba(155,107,232,.15);color:var(--purple);border:1px solid rgba(155,107,232,.3)}
+.sp-badge.karier{background:rgba(82,196,122,.15);color:var(--g2);border:1px solid rgba(82,196,122,.3)}
+.sp-avatar{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:14px;font-weight:900;color:#fff;margin-bottom:10px}
+.sp-name{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px}
+.sp-ang{font-size:10px;color:var(--g2);font-weight:700}
+.sp-desc{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+/* TREEMAP INDUSTRI */
+.treemap-wrap{padding:20px 24px;border-top:1px solid var(--border)}
+.treemap-hd{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.7px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.treemap-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+.treemap-grid{display:flex;flex-wrap:wrap;gap:6px}
+.treemap-cell{border-radius:8px;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:8px 10px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;min-height:48px}
+.treemap-cell:hover{transform:scale(1.02);z-index:2}
+.treemap-label{font-size:10px;font-weight:800;color:#fff;line-height:1.3;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.treemap-count{font-size:18px;font-weight:900;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+
+/* COMPARISON CHART */
+.compare-wrap{padding:0 24px 20px}
+.compare-hd{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.7px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.compare-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+.compare-chart{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px}
+.compare-legend{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.compare-leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.compare-leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.compare-bars{display:flex;flex-direction:column;gap:10px}
+.compare-row{display:flex;align-items:center;gap:10px}
+.compare-ang-lbl{font-size:11px;font-weight:700;color:var(--muted);width:48px;flex-shrink:0}
+.compare-bar-group{flex:1;display:flex;flex-direction:column;gap:3px}
+.compare-bar-track{height:14px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden;position:relative}
+.compare-bar-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.compare-bar-val{position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  font-size:9px;font-weight:800;color:rgba(255,255,255,.8)}
+
+/* MAP POPUP */
+.map-popup{position:absolute;z-index:30;background:var(--s1);border:1px solid var(--border2);
+  border-radius:12px;padding:14px;min-width:200px;max-width:260px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);display:none}
+.map-popup.show{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.mp-title{font-size:12px;font-weight:800;color:var(--text);margin-bottom:8px;
+  padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+.mp-close{cursor:pointer;color:var(--muted);font-size:14px}
+.mp-item{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;border-radius:6px;
+  padding:4px 6px;margin:0 -6px;transition:background .15s}
+.mp-item:hover{background:rgba(82,196,122,.08)}
+.mp-avatar{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
+.mp-info{min-width:0}
+.mp-name{font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp-meta{font-size:10px;color:var(--muted)}
+.mp-more{font-size:10px;color:var(--g2);font-weight:700;margin-top:6px;padding-top:6px;
+  border-top:1px solid var(--border);cursor:pointer}
+.mp-more:hover{text-decoration:underline}
 
 .btn-db-cta{margin-left:auto;padding:6px 16px;border-radius:20px;
   border:1.5px solid var(--g2);background:rgba(82,196,122,.1);color:var(--g2);
@@ -662,15 +745,30 @@ footer b{color:var(--g2)}
 
 <div class="stats">
   <div class="sc" onclick="goPage(2)" style="cursor:pointer" title="Lihat semua alumni">
-    <div class="sc-lbl">Total Alumni</div><div class="sc-val" id="s-total">—</div><div class="sc-sub">Klik untuk lihat database →</div>
+    <div class="sc-lbl">Total Alumni</div>
+    <div class="sc-val" id="s-total">—</div>
+    <div class="sc-mini-bars" id="s-ang-minibars"></div>
+    <div class="sc-insight" id="s-total-insight" style="margin-top:4px"></div>
   </div>
   <div class="sc" onclick="goPage(2)" style="cursor:pointer" title="Lihat database alumni">
-    <div class="sc-lbl">Angkatan</div><div class="sc-val" id="s-ang">—</div><div class="sc-sub">NFL-1 s/d NFL-13</div>
+    <div class="sc-lbl">Angkatan</div>
+    <div class="sc-val" id="s-ang">—</div>
+    <div class="sc-sub">NFL-1 s/d NFL-13</div>
   </div>
-  <div class="sc"><div class="sc-lbl">Provinsi</div><div class="sc-val" id="s-prov">—</div><div class="sc-sub">Sebaran domisili</div></div>
-  <div class="sc"><div class="sc-lbl">Universitas</div><div class="sc-val" id="s-univ">—</div><div class="sc-sub">Perguruan tinggi</div></div>
+  <div class="sc">
+    <div class="sc-lbl">Provinsi</div>
+    <div class="sc-val" id="s-prov">—</div>
+    <div class="sc-insight" id="s-prov-insight" style="margin-top:4px"></div>
+  </div>
+  <div class="sc">
+    <div class="sc-lbl">Universitas</div>
+    <div class="sc-val" id="s-univ">—</div>
+    <div class="sc-insight" id="s-univ-insight" style="margin-top:4px"></div>
+  </div>
   <div class="sc" onclick="goPage2WithStatus('bekerja')" style="cursor:pointer" title="Lihat alumni yang bekerja">
-    <div class="sc-lbl">Bekerja</div><div class="sc-val" id="s-kerja">—</div><div class="sc-sub">Klik untuk lihat →</div>
+    <div class="sc-lbl">Produktif</div>
+    <div class="sc-val" id="s-kerja">—</div>
+    <div class="sc-insight" id="s-kerja-insight" style="margin-top:4px"></div>
   </div>
 </div>
 
@@ -759,7 +857,11 @@ footer b{color:var(--g2)}
         <div class="ml"><div class="mld" style="background:#f0c85a"></div>51–100 alumni</div>
         <div class="ml"><div class="mld" style="background:#e85a5a"></div>100+ alumni</div>
       </div>
-      <div id="map-tip"></div>
+      <div class="map-popup" id="map-popup">
+    <div class="mp-title"><span id="mp-prov-name">Provinsi</span><span class="mp-close" onclick="closeMapPopup()">✕</span></div>
+    <div id="mp-list"></div>
+  </div>
+  <div id="map-tip"></div>
     </div>
   </div>
 
@@ -776,6 +878,14 @@ footer b{color:var(--g2)}
       <div class="side-ttl">📍 Top Provinsi</div>
       <div class="bar-list" id="chart-prov"></div>
     </div>
+  </div>
+</div>
+
+<!-- ALUMNI SPOTLIGHT -->
+<div class="spotlight-wrap" id="spotlight-wrap">
+  <div class="spotlight-hd">✨ Alumni Spotlight</div>
+  <div class="spotlight-grid" id="spotlight-grid">
+    <div style="color:var(--muted);font-size:12px">⏳ Memuat...</div>
   </div>
 </div>
 
@@ -815,6 +925,25 @@ footer b{color:var(--g2)}
         <div class="d-leg" id="status-leg"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- TREEMAP INDUSTRI -->
+<div class="treemap-wrap">
+  <div class="treemap-hd">🏭 Peta Industri Alumni</div>
+  <div class="treemap-grid" id="treemap-grid"></div>
+</div>
+
+<!-- COMPARISON CHART ANGKATAN -->
+<div class="compare-wrap">
+  <div class="compare-hd">📊 Perbandingan Antar Angkatan</div>
+  <div class="compare-chart">
+    <div class="compare-legend">
+      <div class="compare-leg-item"><div class="compare-leg-dot" style="background:var(--g2)"></div>Bekerja / Wirausaha</div>
+      <div class="compare-leg-item"><div class="compare-leg-dot" style="background:var(--blue)"></div>Masih Kuliah</div>
+      <div class="compare-leg-item"><div class="compare-leg-dot" style="background:var(--muted)"></div>Lainnya</div>
+    </div>
+    <div class="compare-bars" id="compare-bars"></div>
   </div>
 </div>
 
@@ -1188,6 +1317,9 @@ function renderAll() {
   renderOrganisasi();
   renderSearch();
   renderOrgMembers();
+  renderSpotlight();
+  renderTreemap();
+  renderComparison();
 }
 
 // ── STATS ────────────────────────────────────────────────────────
@@ -1196,18 +1328,64 @@ function renderStats() {
   var angs  = {};
   var provs = {};
   var univs = {};
-  var emp   = 0;
+  var emp = 0, wirausaha = 0, kuliah = 0, luarNegeri = 0;
   d.forEach(function(a) {
-    if (a.angkatan_nfl) angs[a.angkatan_nfl] = 1;
+    if (a.angkatan_nfl) angs[a.angkatan_nfl] = (angs[a.angkatan_nfl]||0) + 1;
     if (a.provinsi)     provs[a.provinsi] = 1;
     if (a.universitas)  univs[a.universitas] = 1;
-    if (a.status_kerja && (a.status_kerja.indexOf('Bekerja') === 0 || a.status_kerja === 'Wirausaha / Entrepreneur' || a.status_kerja === 'Freelancer / Konsultan')) emp++;
+    if (a.negara && a.negara.toLowerCase() !== 'indonesia' && a.negara.trim()) luarNegeri++;
+    if (a.status_kerja) {
+      if (a.status_kerja.indexOf('Bekerja') === 0 || a.status_kerja === 'Freelancer / Konsultan') emp++;
+      if (a.status_kerja === 'Wirausaha / Entrepreneur') wirausaha++;
+      if (a.status_kerja === 'Masih Kuliah') kuliah++;
+    }
   });
-  document.getElementById('s-total').textContent = d.length || '—';
+  var total = d.length;
+
+  document.getElementById('s-total').textContent = total || '—';
   document.getElementById('s-ang').textContent   = Object.keys(angs).length || '—';
   document.getElementById('s-prov').textContent  = Object.keys(provs).length || '—';
   document.getElementById('s-univ').textContent  = Object.keys(univs).length || '—';
-  document.getElementById('s-kerja').textContent = d.length ? Math.round(emp/d.length*100)+'%' : '—';
+  document.getElementById('s-kerja').textContent = total ? Math.round((emp+wirausaha)/total*100)+'%' : '—';
+
+  // Insight text
+  var totalEl = document.getElementById('s-total-insight');
+  if (totalEl && luarNegeri > 0) totalEl.textContent = luarNegeri + ' di luar negeri';
+  else if (totalEl) totalEl.textContent = Object.keys(angs).length + ' angkatan terdaftar';
+
+  var kerjEl = document.getElementById('s-kerja-insight');
+  if (kerjEl) kerjEl.textContent = wirausaha + ' wirausaha · ' + emp + ' karyawan';
+
+  var provEl = document.getElementById('s-prov-insight');
+  if (provEl) {
+    var topProv = Object.entries(provs).sort(function(a,b){ return (b[1]||0)-(a[1]||0); });
+    var topProvName = Object.keys(provs)[0] || '';
+    // Cari provinsi terbanyak
+    var provCount = {};
+    d.forEach(function(a){ if(a.provinsi) provCount[a.provinsi]=(provCount[a.provinsi]||0)+1; });
+    var sortedProv = Object.entries(provCount).sort(function(a,b){return b[1]-a[1];});
+    if (sortedProv.length) provEl.textContent = 'Terbanyak: ' + sortedProv[0][0].replace('DKI ','');
+  }
+
+  var univEl = document.getElementById('s-univ-insight');
+  if (univEl) {
+    var univCount = {};
+    d.forEach(function(a){ if(a.universitas) univCount[a.universitas]=(univCount[a.universitas]||0)+1; });
+    var sortedUniv = Object.entries(univCount).sort(function(a,b){return b[1]-a[1];});
+    if (sortedUniv.length) univEl.textContent = 'Top: ' + sortedUniv[0][0].replace('Universitas ','Univ. ').slice(0,22);
+  }
+
+  // Mini bars for angkatan in total card
+  var miniBarsEl = document.getElementById('s-ang-minibars');
+  if (miniBarsEl && Object.keys(angs).length > 0) {
+    var maxAng = Math.max.apply(null, Object.values(angs));
+    var angKeys = ['NFL-1','NFL-2','NFL-3','NFL-4','NFL-5','NFL-6','NFL-7','NFL-8','NFL-9','NFL-10','NFL-11','NFL-12','NFL-13'];
+    miniBarsEl.innerHTML = angKeys.map(function(k) {
+      var count = angs[k] || 0;
+      var pct = maxAng ? Math.round(count/maxAng*100) : 0;
+      return '<div class="sc-mini-bar" title="'+k+': '+count+'" style="height:'+(pct||4)+'%;background:'+(count?'var(--g2)':'rgba(82,196,122,.15)')+'" onclick="setAngkatan(\''+k+'\',document.getElementById(\'fc-'+k+'\'))"></div>';
+    }).join('');
+  }
 }
 
 // ── MAP ──────────────────────────────────────────────────────────
@@ -1349,6 +1527,16 @@ function renderMap() {
       tip.style.left = tx+'px'; tip.style.top = ty+'px';
     });
     dot.addEventListener('mouseleave', function(){ tip.style.display='none'; });
+
+    // CLICK → popup alumni
+    dot.addEventListener('click', function(e) {
+      tip.style.display = 'none';
+      var rect = document.getElementById('maparea').getBoundingClientRect();
+      var px = e.clientX - rect.left + 12;
+      var py = e.clientY - rect.top - 10;
+      showMapPopup(p.n, px, py);
+      e.stopPropagation();
+    });
 
     dotsG.appendChild(dot);
     dotsG.appendChild(txt);
@@ -2384,18 +2572,273 @@ function loginVerifTgl() {
   document.getElementById('login-screen').classList.add('hidden');
 }
 
+// ── ALUMNI SPOTLIGHT ─────────────────────────────────────────────
+function renderSpotlight() {
+  var grid = document.getElementById('spotlight-grid');
+  if (!grid) return;
+  var d = allData;
+  if (!d.length) return;
+
+  var candidates = [];
+
+  // 1. International alumni (student exchange / beasiswa luar negeri)
+  var intl = d.filter(function(a){
+    return a.pendidikan_tambahan && (
+      /student exchange|pertukaran pelajar|beasiswa luar negeri|international|luar negeri/i.test(a.pendidikan_tambahan)
+    );
+  });
+  if (intl.length) candidates.push({ type:'intl', badge:'✈️ International', cls:'intl', alumni: intl[Math.floor(Math.random()*intl.length)] });
+
+  // 2. Wirausaha
+  var wira = d.filter(function(a){ return a.status_kerja === 'Wirausaha / Entrepreneur'; });
+  if (wira.length) candidates.push({ type:'wira', badge:'🚀 Wirausaha', cls:'wirausaha', alumni: wira[Math.floor(Math.random()*wira.length)] });
+
+  // 3. Dual degree / S2
+  var s2 = d.filter(function(a){
+    return (a.pendidikan_tambahan && /Edu2:/i.test(a.pendidikan_tambahan)) ||
+           (a.jenjang && /S2|Magister|Profesi/i.test(a.jenjang));
+  });
+  if (s2.length) candidates.push({ type:'s2', badge:'🎓 Pendidikan Lanjutan', cls:'akademik', alumni: s2[Math.floor(Math.random()*s2.length)] });
+
+  // 4. Bekerja di pemerintahan / BUMN
+  var gov = d.filter(function(a){
+    return a.status_kerja === 'Bekerja — BUMN' || a.status_kerja === 'Bekerja — PNS / ASN' ||
+           (a.bidang_industri && /pemerintahan|kebijakan/i.test(a.bidang_industri));
+  });
+  if (gov.length) candidates.push({ type:'gov', badge:'🏛️ Pelayan Publik', cls:'karier', alumni: gov[Math.floor(Math.random()*gov.length)] });
+
+  // 5. Random aktif alumni
+  var aktif = d.filter(function(a){ return a.aktif_alumni && a.aktif_alumni.indexOf('Ya') >= 0 && a.perusahaan; });
+  if (aktif.length) candidates.push({ type:'aktif', badge:'⭐ Alumni Aktif', cls:'karier', alumni: aktif[Math.floor(Math.random()*aktif.length)] });
+
+  // Ambil 3 kandidat unik
+  var used = {};
+  var shown = [];
+  candidates.forEach(function(c) {
+    if (shown.length >= 3) return;
+    var key = c.alumni.nama;
+    if (!used[key]) { used[key] = true; shown.push(c); }
+  });
+
+  // Fallback kalau kurang dari 3
+  while (shown.length < 3 && d.length > shown.length) {
+    var a = d[Math.floor(Math.random()*d.length)];
+    if (!used[a.nama]) {
+      used[a.nama] = true;
+      shown.push({ type:'alumni', badge:'👤 Alumni', cls:'karier', alumni: a });
+    }
+  }
+
+  var html = shown.map(function(c) {
+    var a = c.alumni;
+    var col = avatarColor(a.nama||'');
+    var ini = getInitials(a.nama||'?');
+    var desc = '';
+    if (a.perusahaan && a.jabatan) desc = a.jabatan + ' di ' + a.perusahaan;
+    else if (a.perusahaan) desc = a.perusahaan;
+    else if (a.universitas) desc = a.jenjang ? a.jenjang + ' — ' + a.universitas : a.universitas;
+    else if (a.status_kerja) desc = a.status_kerja;
+
+    var extraDesc = '';
+    if (c.type === 'intl') {
+      var match = (a.pendidikan_tambahan||'').match(/student exchange[^\]]*?\]\s*([^|(]+)/i);
+      if (match) extraDesc = '✈️ ' + match[1].trim().slice(0,50);
+    }
+
+    return '<div class="spotlight-card" onclick="openRincianByNama(\''+escHtml(a.nama)+'\')">'
+      + '<div class="sp-badge '+c.cls+'">'+c.badge+'</div>'
+      + '<div class="sp-avatar" style="background:'+col+'">'+ini+'</div>'
+      + '<div class="sp-name">'+escHtml(a.nama||'—')+'</div>'
+      + '<div class="sp-ang">'+escHtml(a.angkatan_nfl||'—')+(a.kota ? ' · '+escHtml(a.kota) : '')+'</div>'
+      + '<div class="sp-desc">'+escHtml(desc)+(extraDesc?'<br><span style="color:var(--blue)">'+escHtml(extraDesc)+'</span>':'')+'</div>'
+      + '</div>';
+  }).join('');
+
+  grid.innerHTML = html || '<div style="color:var(--muted);font-size:12px">Data alumni belum tersedia</div>';
+}
+
+function openRincianByNama(nama) {
+  var found = allData.filter(function(a){ return a.nama === nama; });
+  if (found.length) openRincian(found[0]);
+}
+
+// ── TREEMAP INDUSTRI ─────────────────────────────────────────────
+function renderTreemap() {
+  var el = document.getElementById('treemap-grid');
+  if (!el) return;
+  var d = filteredData;
+
+  var count = {};
+  d.forEach(function(a){
+    if (a.bidang_industri && a.bidang_industri !== 'Lainnya') {
+      count[a.bidang_industri] = (count[a.bidang_industri]||0) + 1;
+    }
+  });
+
+  var sorted = Object.entries(count).sort(function(a,b){return b[1]-a[1];});
+  if (!sorted.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px">Belum ada data industri</div>'; return; }
+
+  var COLORS = [
+    'linear-gradient(135deg,#1a6b3a,#2d9a56)',
+    'linear-gradient(135deg,#1a4d6b,#2d7aa3)',
+    'linear-gradient(135deg,#6b3a1a,#a35c2d)',
+    'linear-gradient(135deg,#4d1a6b,#7a2da3)',
+    'linear-gradient(135deg,#1a6b6b,#2da3a3)',
+    'linear-gradient(135deg,#6b6b1a,#a3a32d)',
+    'linear-gradient(135deg,#6b1a4d,#a32d7a)',
+    'linear-gradient(135deg,#2d4d1a,#4a7a2d)',
+  ];
+
+  var max = sorted[0][1];
+  var html = sorted.map(function(item, i) {
+    var name = item[0], cnt = item[1];
+    var pct  = cnt / max;
+    var w    = Math.max(80, Math.round(pct * 200)) + 'px';
+    var h    = Math.max(48, Math.round(pct * 100)) + 'px';
+    var col  = COLORS[i % COLORS.length];
+    return '<div class="treemap-cell" title="'+escHtml(name)+': '+cnt+' alumni" '
+      + 'style="width:'+w+';height:'+h+';background:'+col+';flex-grow:'+Math.round(pct*10)+'" '
+      + 'onclick="filterByIndustri(\''+escHtml(name)+'\')">'
+      + '<div class="treemap-count">'+cnt+'</div>'
+      + '<div class="treemap-label">'+escHtml(name.replace(' & ',' &\n'))+'</div>'
+      + '</div>';
+  }).join('');
+
+  el.innerHTML = html;
+}
+
+function filterByIndustri(industri) {
+  // Navigate to page 2 and filter by industri via search
+  goPage(2);
+  var inp = document.getElementById('p2-search');
+  if (inp) { inp.value = industri; renderPage2(); }
+}
+
+// ── COMPARISON CHART ANGKATAN ─────────────────────────────────────
+function renderComparison() {
+  var el = document.getElementById('compare-bars');
+  if (!el) return;
+  var d = allData;
+
+  var angs = {};
+  d.forEach(function(a) {
+    if (!a.angkatan_nfl) return;
+    if (!angs[a.angkatan_nfl]) angs[a.angkatan_nfl] = { total:0, kerja:0, kuliah:0, lain:0 };
+    angs[a.angkatan_nfl].total++;
+    if (a.status_kerja && (a.status_kerja.indexOf('Bekerja')===0 || a.status_kerja==='Wirausaha / Entrepreneur' || a.status_kerja==='Freelancer / Konsultan'))
+      angs[a.angkatan_nfl].kerja++;
+    else if (a.status_kerja === 'Masih Kuliah')
+      angs[a.angkatan_nfl].kuliah++;
+    else
+      angs[a.angkatan_nfl].lain++;
+  });
+
+  var angKeys = Object.keys(angs).sort();
+  if (!angKeys.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">Belum ada data</div>'; return; }
+
+  var maxTotal = Math.max.apply(null, angKeys.map(function(k){ return angs[k].total; }));
+
+  var html = angKeys.map(function(ang) {
+    var a = angs[ang];
+    var kerjaPct  = Math.round(a.kerja  / maxTotal * 100);
+    var kuliahPct = Math.round(a.kuliah / maxTotal * 100);
+    var lainPct   = Math.round(a.lain   / maxTotal * 100);
+    var totalW    = Math.round(a.total  / maxTotal * 100);
+
+    return '<div class="compare-row">'
+      + '<div class="compare-ang-lbl">'+escHtml(ang.replace('NFL-','NFL '))+'</div>'
+      + '<div class="compare-bar-group">'
+        + '<div class="compare-bar-track" style="max-width:'+totalW+'%">'
+          + '<div class="compare-bar-fill" style="width:'+Math.round(a.kerja/a.total*100)+'%;background:var(--g2);float:left"></div>'
+          + '<div class="compare-bar-fill" style="width:'+Math.round(a.kuliah/a.total*100)+'%;background:var(--blue);float:left"></div>'
+          + '<div class="compare-bar-fill" style="width:'+Math.round(a.lain/a.total*100)+'%;background:var(--muted);float:left"></div>'
+        + '</div>'
+      + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:var(--text);min-width:24px">'+a.total+'</div>'
+      + '</div>';
+  }).join('');
+
+  el.innerHTML = html;
+}
+
+// ── MAP POPUP ──────────────────────────────────────────────────────
+function showMapPopup(prov, x, y) {
+  var popup = document.getElementById('map-popup');
+  var provName = document.getElementById('mp-prov-name');
+  var list = document.getElementById('mp-list');
+  if (!popup || !list) return;
+
+  var alumni = filteredData.filter(function(a){
+    if (activeMapLayer === 'kerja') return normalizeKotaToProvinsi(a.kota_kerja) === prov;
+    if (activeMapLayer === 'kampus') return normalizeKotaToProvinsi(a.kota_kampus) === prov;
+    return a.provinsi === prov;
+  });
+
+  if (!alumni.length) return;
+
+  provName.textContent = '📍 ' + prov + ' (' + alumni.length + ')';
+
+  var shown = alumni.slice(0, 5);
+  var html = shown.map(function(a) {
+    var col = avatarColor(a.nama||'');
+    var ini = getInitials(a.nama||'?');
+    var meta = a.angkatan_nfl || '';
+    if (a.perusahaan) meta += (meta?' · ':'') + a.perusahaan.slice(0,20);
+    else if (a.universitas) meta += (meta?' · ':'') + a.universitas.slice(0,20);
+    return '<div class="mp-item" onclick="openRincianByNama(\''+escHtml(a.nama)+'\')">'
+      + '<div class="mp-avatar" style="background:'+col+'">'+ini+'</div>'
+      + '<div class="mp-info"><div class="mp-name">'+escHtml(a.nama||'—')+'</div>'
+      + '<div class="mp-meta">'+escHtml(meta)+'</div></div>'
+      + '</div>';
+  }).join('');
+
+  if (alumni.length > 5) {
+    html += '<div class="mp-more" onclick="goToProvinsi(\''+escHtml(prov)+'\')">Lihat semua '+alumni.length+' alumni →</div>';
+  }
+
+  list.innerHTML = html;
+
+  // Position popup
+  var mapArea = document.getElementById('maparea');
+  var rect = mapArea.getBoundingClientRect();
+  var px = Math.min(x, rect.width - 270);
+  var py = Math.min(y, rect.height - 200);
+  popup.style.left = px + 'px';
+  popup.style.top  = py + 'px';
+  popup.classList.add('show');
+}
+
+function closeMapPopup() {
+  var popup = document.getElementById('map-popup');
+  if (popup) popup.classList.remove('show');
+}
+
+function goToProvinsi(prov) {
+  closeMapPopup();
+  goPage(2);
+  var inp = document.getElementById('p2-search');
+  if (inp) { inp.value = prov; renderPage2(); }
+}
+
 // ── INIT ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
-  // Cek sesi aktif — kalau sudah login sebelumnya, langsung masuk
   if (checkSession()) {
     document.getElementById('login-screen').classList.add('hidden');
   }
   loadFromSheets();
-  // Focus input nama setelah data mulai load
   setTimeout(function(){
     var inp = document.getElementById('login-nama');
     if (inp && !document.getElementById('login-screen').classList.contains('hidden')) inp.focus();
   }, 300);
+
+  // Close map popup on outside click
+  setTimeout(function() {
+    var ma = document.getElementById('maparea');
+    if (ma) ma.addEventListener('click', function(e) {
+      var popup = document.getElementById('map-popup');
+      if (popup && !popup.contains(e.target) && e.target.tagName !== 'circle') closeMapPopup();
+    });
+  }, 500);
 });
 </script>
 </body>
