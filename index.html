@@ -1896,42 +1896,90 @@ function konfirmasiUpdate() {
 
 // ── PRE-FILL FORM dari data Sheets ───────────────────────────
 function prefillForm(d) {
-  // Helper set value
-  const sv = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
-  const sc = (id, val) => { // set & trigger change
+  const sv = (id, val) => {
+    if (!val) return;
     const el = document.getElementById(id);
-    if (el && val) { el.value = val; el.dispatchEvent(new Event('change')); }
+    if (el) el.value = val;
+  };
+
+  const sc = (id, val) => {
+    if (!val) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Coba exact match dulu
+    for (const opt of el.options) {
+      if (opt.value === val || opt.text === val) {
+        el.value = opt.value;
+        el.dispatchEvent(new Event('change'));
+        return;
+      }
+    }
+    // Coba partial match (untuk jenjang, status, dll)
+    for (const opt of el.options) {
+      if (opt.text.toLowerCase().includes(val.toLowerCase()) ||
+          val.toLowerCase().includes(opt.text.toLowerCase())) {
+        el.value = opt.value;
+        el.dispatchEvent(new Event('change'));
+        return;
+      }
+    }
+  };
+
+  const clickRcard = (containerId, val) => {
+    if (!val) return;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.querySelectorAll('.rcard').forEach(c => {
+      const txt = c.textContent.trim();
+      if (txt.toLowerCase().includes(val.toLowerCase()) ||
+          val.toLowerCase().includes(txt.substring(0,15).toLowerCase())) {
+        c.click();
+      }
+    });
+  };
+
+  const clickChip = (containerId, val) => {
+    if (!val) return;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.querySelectorAll('.chip-opt').forEach(c => {
+      if (c.textContent.trim() === val) c.click();
+    });
   };
 
   // ── Step 1: Data Diri ──
   sv('f-nama', d.nama);
   sv('f-panggil', d.panggilan);
-  sv('f-lahir', d.tgl_lahir);
 
-  // Gender chip
-  if (d.gender) {
-    document.querySelectorAll('#rc-gender .rcard').forEach(c => {
-      if (c.textContent.includes(d.gender)) c.click();
-    });
+  // Tanggal lahir — pastikan format YYYY-MM-DD
+  if (d.tgl_lahir) {
+    let tgl = d.tgl_lahir;
+    // Jika format DD/MM/YYYY → convert ke YYYY-MM-DD
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(tgl)) {
+      const [dd, mm, yy] = tgl.split('/');
+      tgl = yy + '-' + mm + '-' + dd;
+    }
+    sv('f-lahir', tgl);
   }
 
-  // Provinsi & kota lahir
+  // Gender
+  clickRcard('rc-gender', d.gender);
+
+  // Provinsi & kota lahir — cari provinsi dari KOTA_BY_PROV
   if (d.kota_lahir) {
-    // Coba match provinsi dari kota_lahir (format: "Kota X, Provinsi Y" atau langsung kota)
-    // Cari provinsi yang cocok
-    const provSel = document.getElementById('f-prov-lahir');
-    if (provSel) {
-      // Set prov lahir jika ada datanya
-      // kota_lahir mungkin format "Kota Bandung" atau "Kota Bandung, Jawa Barat"
-      const kotaVal = d.kota_lahir;
-      // Cari provinsi dari KOTA_BY_PROV
-      for (const [prov, kota] of Object.entries(KOTA_BY_PROV || {})) {
-        if (kota.some(k => k.toLowerCase() === kotaVal.toLowerCase())) {
-          sc('f-prov-lahir', prov);
-          setTimeout(() => sv('f-kotalahir', kotaVal), 100);
-          break;
-        }
+    let foundProv = '';
+    for (const [prov, kotaList] of Object.entries(KOTA_BY_PROV || {})) {
+      if (kotaList.some(k => k.toLowerCase() === d.kota_lahir.toLowerCase())) {
+        foundProv = prov;
+        break;
       }
+    }
+    if (foundProv) {
+      sc('f-prov-lahir', foundProv);
+      setTimeout(() => sv('f-kotalahir', d.kota_lahir), 150);
+    } else {
+      // Kota tidak ditemukan di dropdown — isi teks langsung jika ada field teks
+      sv('f-kotalahir', d.kota_lahir);
     }
   }
 
@@ -1942,92 +1990,113 @@ function prefillForm(d) {
   sc('f-jenjang', d.jenjang);
   sv('f-masuk-kuliah', d.tahun_masuk_kuliah);
 
-  // Tahun lulus — cek ongoing
   if (d.tahun_lulus_kuliah === 'Sedang Berlangsung') {
     const cb = document.getElementById('cb-ongoing-kuliah');
     if (cb) { cb.checked = true; toggleOngoing('kuliah'); }
   } else {
     sv('f-lulus-kuliah', d.tahun_lulus_kuliah);
   }
-
   sv('f-kota-kampus', d.kota_kampus);
 
-  // Pendidikan tambahan — parse dari string
+  // Parse pendidikan_tambahan → pisahkan Edu2 dan Pengalaman Akademik
   if (d.pendidikan_tambahan) {
-    prefillPendidikanTambahan(d.pendidikan_tambahan);
-  }
+    const rawPendTambahan = d.pendidikan_tambahan;
+    // Edu2 entries: "Edu2: Univ / Fak / Jenjang" atau "Edu2: Univ / Fak / Jurusan / Jenjang"
+    const edu2Parts = rawPendTambahan.split(' || ').filter(e => e.trim().startsWith('Edu2:'));
+    const akademikParts = rawPendTambahan.split(/Pengalaman Akademik:/i);
+    const akademikRaw = akademikParts.length > 1 ? akademikParts[1].trim() : '';
 
-  // Program akademik — parse dari pendidikan_tambahan (bagian [Jenis])
-  if (d.pendidikan_tambahan) {
-    prefillProgramAkademik(d.pendidikan_tambahan);
+    // Prefill double degree / S2
+    edu2Parts.forEach((entry, i) => {
+      addEdu();
+      const idx = i + 1;
+      const clean = entry.replace(/^Edu2:\s*/i, '').trim();
+      // Format: "Univ / Fak / Jurusan / Jenjang" atau "Univ / Jurusan / Jenjang"
+      const parts = clean.split(/\s*\/\s*/);
+      setTimeout(() => {
+        sv('f-univ-' + idx, parts[0] || '');
+        if (parts.length === 4) {
+          sv('f-fak-' + idx, parts[1] || '');
+          sv('f-jurusan-' + idx, parts[2] || '');
+          sc('f-jenjang-' + idx, parts[3] || '');
+        } else if (parts.length === 3) {
+          sv('f-fak-' + idx, parts[1] || '');
+          sc('f-jenjang-' + idx, parts[2] || '');
+        } else if (parts.length === 2) {
+          sc('f-jenjang-' + idx, parts[1] || '');
+        }
+      }, 100 * (i + 1));
+    });
+
+    // Prefill program akademik
+    if (akademikRaw) {
+      prefillProgramAkademik(akademikRaw);
+    }
   }
 
   // ── Step 3: NFBSL ──
-  sc('f-angkatan', d.angkatan_nfbsl);
-  sv('f-masuk-nfl', d.tahun_masuk_nfbsl);
-  sv('f-lulus-nfl', d.tahun_lulus_nfbsl);
-  sv('f-org-nfbsl', d.org_nfbsl);
+  setTimeout(() => {
+    sc('f-angkatan', d.angkatan_nfbsl);
+    sv('f-masuk-nfl', d.tahun_masuk_nfbsl);
+    sv('f-lulus-nfl', d.tahun_lulus_nfbsl);
+    sv('f-org-nfbsl', d.org_nfbsl);
+  }, 100);
 
   // ── Step 4: Karier ──
-  // Status kerja chip
-  if (d.status_kerja) {
-    document.querySelectorAll('[id^="rc-status"] .rcard, .rcard').forEach(c => {
-      if (c.dataset && c.dataset.val === d.status_kerja) c.click();
-    });
-    // Coba via onclick
-    document.querySelectorAll('.rcard').forEach(c => {
-      if (c.textContent.trim().startsWith(d.status_kerja.substring(0,10))) c.click();
-    });
-  }
-  sv('f-perusahaan', d.perusahaan);
-  sv('f-jabatan', d.jabatan);
-  sc('f-industri', d.bidang_industri);
-  sv('f-kota-kerja', d.kota_kerja);
+  setTimeout(() => {
+    // Status kerja — cari rcard yang cocok
+    if (d.status_kerja) {
+      document.querySelectorAll('.rcard').forEach(c => {
+        const title = c.querySelector('.rcard-title');
+        if (title && title.textContent.trim() === d.status_kerja) c.click();
+        else if (title && d.status_kerja.includes(title.textContent.trim().substring(0,10))) c.click();
+      });
+    }
+    sv('f-perusahaan', d.perusahaan);
+    sv('f-jabatan', d.jabatan);
+    sc('f-industri', d.bidang_industri);
+    sv('f-kota-kerja', d.kota_kerja);
 
-  // Sampingan — parse pipe format
-  if (d.perusahaan_sampingan && d.perusahaan_sampingan.includes('|')) {
-    // Format baru: nama|jabatan|lokasi|industri || ...
-    toggleSampingan(); // buka section
-    const entries = d.perusahaan_sampingan.split(' || ');
-    entries.forEach((entry, i) => {
-      if (i > 0) addSampingan();
-      const [nama, jabatan, lokasi, industri] = entry.split('|');
-      const idx = i + 1;
+    // Sampingan
+    if (d.perusahaan_sampingan && d.perusahaan_sampingan.includes('|')) {
+      toggleSampingan();
+      const entries = d.perusahaan_sampingan.split(' || ');
+      entries.forEach((entry, i) => {
+        if (i > 0) addSampingan();
+        const [nama, jabatan, lokasi, industri] = entry.split('|');
+        const idx = i + 1;
+        setTimeout(() => {
+          sv('f-sp-nama-' + idx, (nama||'').trim());
+          sv('f-sp-jabatan-' + idx, (jabatan||'').trim());
+          sv('f-sp-lokasi-' + idx, (lokasi||'').trim());
+          sc('f-sp-industri-' + idx, (industri||'').trim());
+        }, 80 * (i + 1));
+      });
+    } else if (d.perusahaan_sampingan) {
+      // Format lama
+      toggleSampingan();
       setTimeout(() => {
-        sv('f-sp-nama-' + idx, nama || '');
-        sv('f-sp-jabatan-' + idx, jabatan || '');
-        sv('f-sp-lokasi-' + idx, lokasi || '');
-        sc('f-sp-industri-' + idx, industri || '');
-      }, 50 * (i + 1));
-    });
-  } else if (d.perusahaan_sampingan) {
-    // Format lama: field terpisah
-    toggleSampingan();
-    setTimeout(() => {
-      sv('f-sp-nama-1', d.perusahaan_sampingan);
-      sv('f-sp-jabatan-1', d.jabatan_sampingan);
-      sc('f-sp-industri-1', d.industri_sampingan);
-    }, 100);
-  }
+        sv('f-sp-nama-1', d.perusahaan_sampingan);
+        sv('f-sp-jabatan-1', d.jabatan_sampingan);
+        sc('f-sp-industri-1', d.industri_sampingan);
+      }, 100);
+    }
+  }, 200);
 
   // ── Step 5: Organisasi ──
-  if (d.organisasi_eksternal) {
-    // Klik "Ya, saya tergabung"
-    document.querySelectorAll('#rc-ikut-org .rcard').forEach(c => {
-      if (c.textContent.includes('Ya')) c.click();
-    });
-    setTimeout(() => prefillOrganisasi(d.organisasi_eksternal), 200);
-  } else {
-    document.querySelectorAll('#rc-ikut-org .rcard').forEach(c => {
-      if (c.textContent.includes('Tidak')) c.click();
-    });
-  }
-
-  if (d.aktif_alumni) {
-    document.querySelectorAll('#cg-aktif-alumni .chip-opt').forEach(c => {
-      if (c.textContent.trim() === d.aktif_alumni) c.click();
-    });
-  }
+  setTimeout(() => {
+    if (d.organisasi_eksternal) {
+      document.querySelectorAll('#rc-ikut-org .rcard').forEach(c => {
+        if (c.textContent.includes('Ya')) c.click();
+      });
+      setTimeout(() => prefillOrganisasi(d.organisasi_eksternal), 200);
+    } else {
+      document.querySelectorAll('#rc-ikut-org .rcard').forEach(c => {
+        if (c.textContent.includes('Tidak')) c.click();
+      });
+    }
+    clickChip('cg-aktif-alumni', d.aktif_alumni);
+  }, 300);
 
   // ── Step 6: Domisili ──
   setTimeout(() => {
@@ -2035,83 +2104,96 @@ function prefillForm(d) {
     setTimeout(() => {
       sc('f-kota', d.kota);
       sv('f-negara', d.negara);
-    }, 150);
-  }, 100);
+    }, 200);
+  }, 400);
 
   // ── Step 7: Kontak ──
-  sv('f-hp', d.hp);
-  sv('f-email', d.email);
-  sv('f-ig', d.instagram);
-  sv('f-linkedin', d.linkedin);
-  sv('f-wa', d.wa_group);
+  setTimeout(() => {
+    sv('f-hp', d.hp);
+    sv('f-email', d.email);
+    sv('f-ig', d.instagram);
+    sv('f-linkedin', d.linkedin);
+    sv('f-wa', d.wa_group);
+  }, 100);
 }
 
-// ── Parse & prefill pendidikan tambahan (double degree/S2) ──
-function prefillPendidikanTambahan(raw) {
-  // Pendidikan tambahan format: "Univ|Fak|Jurusan|Jenjang|Masuk|Lulus|Kota || ..."
-  // atau combined dengan program akademik — hanya ambil yang BUKAN [bracket] format
-  const entries = raw.split(' || ').filter(e => !e.trim().startsWith('['));
-  entries.forEach((entry, i) => {
-    const parts = entry.split('|');
-    if (parts.length < 3) return;
-    addEdu(); // tambah slot pendidikan tambahan
-    const idx = i + 1;
-    setTimeout(() => {
-      sv('f-univ-' + idx, parts[0] || '');
-      sv('f-fak-' + idx, parts[1] || '');
-      sv('f-jurusan-' + idx, parts[2] || '');
-      sc('f-jenjang-' + idx, parts[3] || '');
-      sv('f-masuk-' + idx, parts[4] || '');
-      const lulus = parts[5] || '';
-      if (lulus === 'Sedang Berlangsung') {
-        const cb = document.getElementById('cb-ongoing-' + idx);
-        if (cb) { cb.checked = true; toggleOngoingExtra(idx); }
-      } else {
-        sv('f-lulus-' + idx, lulus);
-      }
-      sv('f-kota-kampus-' + idx, parts[6] || '');
-    }, 100 * (i + 1));
-  });
-}
-
-// ── Parse & prefill program akademik ──
+// ── Parse program akademik dari format lama & baru ────────────
 function prefillProgramAkademik(raw) {
-  // Format: "[Jenis] Nama — Instansi — Lokasi [Tahun] || ..."
-  const entries = raw.split(' || ').filter(e => e.trim().startsWith('['));
+  if (!raw) return;
+  // Format lama: "[Akademik · Jenis] Nama – Instansi, Lokasi (Tahun) | ..."
+  // Format baru: "[Jenis] Nama — Instansi — Lokasi [Tahun] || ..."
+  const isFormatLama = raw.includes(' · ');
+  const separator = isFormatLama ? ' | ' : ' || ';
+  const entries = raw.split(separator).map(e => e.trim()).filter(Boolean);
+
   entries.forEach((entry, i) => {
     addAkademik();
     const idx = akadCount;
     setTimeout(() => {
-      // Parse [Jenis]
-      const jenisMatch = entry.match(/^\[([^\]]+)\]/);
-      const jenis = jenisMatch ? jenisMatch[1] : '';
-      // Parse tahun [YYYY] di akhir
-      const tahunMatch = entry.match(/\[(\d{4})\]$/);
-      const tahun = tahunMatch ? tahunMatch[1] : '';
-      // Sisa = Nama — Instansi — Lokasi
-      let sisa = entry.replace(/^\[[^\]]+\]\s*/, '').replace(/\s*\[\d{4}\]$/, '');
-      const parts = sisa.split(' — ');
-      const nama     = parts[0] || '';
-      const instansi = parts[1] || '';
-      const lokasi   = parts[2] || '';
+      let kat = 'akademik', jenis = '', nama = '', instansi = '', lokasi = '', tahun = '';
 
-      // Tentukan kategori
-      const AKAD_JENIS = ['Student Exchange','Magang','Beasiswa Luar Negeri','Konferensi Internasional','Kompetisi','Riset / Penelitian','KKN','Program Kepemimpinan','Summer / Winter School','Volunteer Internasional','Short Course','Studi Independen','Lainnya'];
-      const isAkad = AKAD_JENIS.includes(jenis) || !['Ketua / Pengurus BEM','Ketua / Pengurus Himpunan'].includes(jenis);
-      const kat = isAkad ? 'akademik' : 'nonakademik';
+      if (isFormatLama) {
+        // Parse: "[Akademik · Jenis] Nama – Instansi, Lokasi (Tahun)"
+        const bracketMatch = entry.match(/^\[([^\]]+)\]/);
+        if (bracketMatch) {
+          const bracketContent = bracketMatch[1]; // "Akademik · Jenis"
+          const dotParts = bracketContent.split(' · ');
+          kat   = (dotParts[0] || '').toLowerCase().includes('non') ? 'nonakademik' : 'akademik';
+          jenis = dotParts[1] || '';
+        }
+        const afterBracket = entry.replace(/^\[[^\]]+\]\s*/, '');
+        // Split by – (en-dash) atau - (hyphen)
+        const dashParts = afterBracket.split(/\s*[–-]\s*/);
+        nama = dashParts[0] || '';
+        // Tahun dari (YYYY)
+        const tahunMatch = afterBracket.match(/\((\d{4})\)/);
+        tahun = tahunMatch ? tahunMatch[1] : '';
+        // Sisa setelah nama
+        const sisaStr = dashParts.slice(1).join(' – ').replace(/\(\d{4}\)/, '').trim();
+        // Pisah instansi dan lokasi — biasanya dipisah koma atau tanda lain
+        const sisaParts = sisaStr.split(/,\s*/);
+        if (sisaParts.length >= 2) {
+          lokasi   = sisaParts[0].trim();
+          instansi = sisaParts.slice(1).join(', ').trim();
+        } else {
+          instansi = sisaStr;
+        }
+      } else {
+        // Parse format baru: "[Jenis] Nama — Instansi — Lokasi [Tahun]"
+        const bracketMatch = entry.match(/^\[([^\]]+)\]/);
+        jenis = bracketMatch ? bracketMatch[1] : '';
+        kat   = 'akademik'; // default
+        const afterBracket = entry.replace(/^\[[^\]]+\]\s*/, '');
+        const tahunMatch = afterBracket.match(/\[(\d{4})\]$/);
+        tahun = tahunMatch ? tahunMatch[1] : '';
+        const sisa = afterBracket.replace(/\s*\[\d{4}\]$/, '');
+        const parts = sisa.split(/\s*—\s*/);
+        nama     = parts[0] || '';
+        instansi = parts[1] || '';
+        lokasi   = parts[2] || '';
+      }
 
       // Klik radio kategori
       const radio = document.querySelector(`input[name="akad-kat-${idx}"][value="${kat}"]`);
       if (radio) { radio.checked = true; switchKategori(idx, kat); }
 
       setTimeout(() => {
-        sc('f-akad-jenis-' + idx, jenis);
-        sv('f-akad-nama-' + idx, nama);
-        sv('f-akad-instansi-' + idx, instansi);
-        sv('f-akad-lokasi-' + idx, lokasi);
+        // Set jenis — cari yang cocok di dropdown
+        const jenisSel = document.getElementById('f-akad-jenis-' + idx);
+        if (jenisSel && jenis) {
+          for (const opt of jenisSel.options) {
+            if (opt.text === jenis || opt.text.toLowerCase().includes(jenis.toLowerCase().substring(0,15))) {
+              jenisSel.value = opt.value;
+              break;
+            }
+          }
+        }
+        sv('f-akad-nama-' + idx, nama.trim());
+        sv('f-akad-instansi-' + idx, instansi.trim());
+        sv('f-akad-lokasi-' + idx, lokasi.trim());
         sv('f-akad-tahun-' + idx, tahun);
-      }, 100);
-    }, 200 * (i + 1));
+      }, 150);
+    }, 250 * (i + 1));
   });
 }
 
@@ -2124,20 +2206,13 @@ function prefillOrganisasi(raw) {
     const idx = i + 1;
     const parts = entry.split('|');
     setTimeout(() => {
-      sc('f-org-nama-' + idx, parts[0] || '');
-      sv('f-org-jabatan-' + idx, parts[1] || '');
-      sv('f-org-lokasi-' + idx, parts[2] || '');
+      sc('f-org-nama-' + idx, (parts[0]||'').trim());
+      sv('f-org-jabatan-' + idx, (parts[1]||'').trim());
+      sv('f-org-lokasi-' + idx, (parts[2]||'').trim());
     }, 100 * (i + 1));
   });
 }
 
-function lanjutSebagaiBaru() {
-  submitMode = 'NEW';
-  duplikatFallback = null;
-  clearInterval(otpTimerInt);
-  tutupModal();
-  goStep(2);
-}
 
 // ── Modal helpers ─────────────────────────────────────────────
 function showModal(state) {
